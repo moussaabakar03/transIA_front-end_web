@@ -1,0 +1,514 @@
+<div class="premium-error-page">
+
+  <!-- Effet de particules lumineuses -->
+  <div class="premium-particles">
+    <div class="particle particle-1"></div>
+    <div class="particle particle-2"></div>
+    <div class="particle particle-3"></div>
+    <div class="particle particle-4"></div>
+  </div>
+
+  <!-- Overlay gradient subtil -->
+  <div class="premium-overlay"></div>
+
+  <!-- Contenu principal -->
+  <div class="premium-error-container">
+
+    <!-- Animation 3D du 404 -->
+    <div class="premium-error-animation">
+      <div class="error-number-wrapper">
+        <div class="error-digit digit-4">4</div>
+        <div class="error-digit digit-0">0</div>
+        <div class="error-digit digit-4-last">4</div>
+      </div>
+      <div class="error-glow-ring"></div>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div class="premium-error-content">
+      <div class="premium-badge">ERREUR 404</div>
+      <h1 class="premium-title">Page non trouvée</h1>
+      <p class="premium-subtitle">
+        La page que vous recherchez semble introuvable, a été déplacée ou n'existe plus.
+      </p>
+
+      <!-- Icônes décoratives -->
+      <div class="premium-decorations">
+        <div class="deco-line"></div>
+        <div class="deco-dot"></div>
+        <div class="deco-line"></div>
+      </div>
+
+      <!-- Boutons d'action -->
+      <div class="premium-actions">
+        <a routerLink="/dashboard" class="premium-btn-primary">
+          <svg viewBox="0 0 20 20" width="18" height="18" fill="none">
+            <path d="M3 9L10 3L17 9L10 15L3 9Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6 12V16L10 18L14 16V12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Tableau de bord</span>
+        </a>
+        <a routerLink="/login" class="premium-btn-secondary">
+          <svg viewBox="0 0 20 20" width="18" height="18" fill="none">
+            <path d="M13 4L17 8L13 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M7 8H17M7 8L3 8M7 8V12M7 8V4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span>Se connecter</span>
+        </a>
+      </div>
+
+      <!-- Suggestions -->
+      <div class="premium-suggestions">
+        <p class="suggestions-title">Vous pourriez aussi essayer :</p>
+        <div class="suggestions-links">
+          <a routerLink="/dashboard" class="suggestion-link">
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none">
+              <path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            Accueil
+          </a>
+          <a routerLink="/roles" class="suggestion-link">
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none">
+              <path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            Gestion des rôles
+          </a>
+          <a routerLink="/categories" class="suggestion-link">
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none">
+              <path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            Catégories
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Effet de vagues en bas -->
+  <div class="premium-waves">
+    <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+      <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="rgba(174,128,32,0.05)"></path>
+    </svg>
+  </div>
+
+</div>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@300;400;500;600;700;800&display=swap');
+
+.premium-error-page {
+  --gold: #AE8020;
+  --gold-light: #C49A30;
+  --gold-dim: rgba(174, 128, 32, 0.08);
+  --gold-glow: rgba(174, 128, 32, 0.15);
+  --ink: #1C1C1E;
+  --ink-mid: #48484A;
+  --ink-light: #8E8E93;
+  --ink-faint: #C7C7CC;
+  --bg: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-2: #FBF9F5;
+  --border: #E9E9EF;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
+  --font-primary: 'Syne', sans-serif;
+
+  position: relative;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FDFBF7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: var(--font-primary);
+}
+
+/* Particules */
+.premium-particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gold-light), transparent);
+  opacity: 0.06;
+  animation: floatParticle 20s ease-in-out infinite;
+}
+.particle-1 { width: 500px; height: 500px; top: -200px; right: -150px; animation-delay: 0s; }
+.particle-2 { width: 350px; height: 350px; bottom: -100px; left: 10%; animation-delay: -5s; }
+.particle-3 { width: 250px; height: 250px; top: 40%; right: 5%; animation-delay: -10s; }
+.particle-4 { width: 180px; height: 180px; bottom: 20%; right: 20%; animation-delay: -15s; }
+@keyframes floatParticle {
+  0%, 100% { transform: translate(0, 0); opacity: 0.04; }
+  50% { transform: translate(-20px, -20px); opacity: 0.1; }
+}
+
+.premium-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 20% 30%, rgba(174, 128, 32, 0.02) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.premium-error-container {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 40px;
+  max-width: 700px;
+  width: 90%;
+  animation: fadeInUp 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation 3D du 404 */
+.premium-error-animation {
+  position: relative;
+  margin-bottom: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.error-number-wrapper {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.error-digit {
+  font-family: var(--font-primary);
+  font-size: 180px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shine 3s linear infinite;
+  text-shadow: 0 0 30px rgba(174, 128, 32, 0.3);
+  position: relative;
+}
+
+@keyframes shine {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.digit-4 {
+  animation-delay: 0s;
+  transform: translateY(0);
+  animation: floatDigit 3s ease-in-out infinite;
+}
+
+.digit-0 {
+  animation-delay: 0.2s;
+  transform: translateY(0);
+  animation: floatDigit 3s ease-in-out infinite 0.2s;
+}
+
+.digit-4-last {
+  animation-delay: 0.4s;
+  transform: translateY(0);
+  animation: floatDigit 3s ease-in-out infinite 0.4s;
+}
+
+@keyframes floatDigit {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.error-glow-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gold-glow), transparent);
+  filter: blur(40px);
+  animation: pulseRing 2s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes pulseRing {
+  0%, 100% {
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+/* Badge */
+.premium-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  background: var(--gold-dim);
+  border: 1px solid rgba(174, 128, 32, 0.2);
+  border-radius: 40px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--gold);
+  margin-bottom: 24px;
+}
+
+/* Titres */
+.premium-title {
+  font-family: var(--font-primary);
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 16px 0;
+  letter-spacing: -0.02em;
+}
+
+.premium-subtitle {
+  font-size: 16px;
+  color: var(--ink-light);
+  line-height: 1.6;
+  margin: 0 0 32px 0;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Décorations */
+.premium-decorations {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.deco-line {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-border), transparent);
+}
+
+.deco-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+  transform: rotate(45deg);
+  animation: rotateDot 2s ease-in-out infinite;
+}
+
+@keyframes rotateDot {
+  0%, 100% {
+    transform: rotate(45deg) scale(1);
+  }
+  50% {
+    transform: rotate(45deg) scale(1.3);
+  }
+}
+
+/* Boutons */
+.premium-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 48px;
+  flex-wrap: wrap;
+}
+
+.premium-btn-primary,
+.premium-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-primary);
+  border-radius: 60px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  text-decoration: none;
+}
+
+.premium-btn-primary {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: white;
+  box-shadow: 0 4px 14px rgba(174, 128, 32, 0.25);
+}
+
+.premium-btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(174, 128, 32, 0.35);
+}
+
+.premium-btn-secondary {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--ink-mid);
+}
+
+.premium-btn-secondary:hover {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+  color: var(--gold);
+  transform: translateY(-2px);
+}
+
+/* Suggestions */
+.premium-suggestions {
+  border-top: 1px solid var(--border);
+  padding-top: 32px;
+}
+
+.suggestions-title {
+  font-size: 13px;
+  color: var(--ink-light);
+  margin: 0 0 16px 0;
+  font-weight: 500;
+}
+
+.suggestions-links {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.suggestion-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-mid);
+  text-decoration: none;
+  transition: all 0.2s;
+  padding: 4px 8px;
+  border-radius: 40px;
+}
+
+.suggestion-link svg {
+  transition: transform 0.2s;
+}
+
+.suggestion-link:hover {
+  color: var(--gold);
+  background: var(--gold-dim);
+}
+
+.suggestion-link:hover svg {
+  transform: translateX(4px);
+}
+
+/* Vagues en bas */
+.premium-waves {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.premium-waves svg {
+  width: 100%;
+  height: 80px;
+  display: block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .error-digit {
+    font-size: 100px;
+  }
+
+  .error-glow-ring {
+    width: 200px;
+    height: 200px;
+  }
+
+  .premium-title {
+    font-size: 32px;
+  }
+
+  .premium-subtitle {
+    font-size: 14px;
+  }
+
+  .premium-actions {
+    gap: 12px;
+  }
+
+  .premium-btn-primary,
+  .premium-btn-secondary {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+
+  .error-number-wrapper {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .error-digit {
+    font-size: 70px;
+  }
+
+  .error-glow-ring {
+    width: 150px;
+    height: 150px;
+  }
+
+  .premium-title {
+    font-size: 28px;
+  }
+
+  .suggestions-links {
+    gap: 16px;
+  }
+
+  .suggestion-link {
+    font-size: 12px;
+  }
+}
+</style>
