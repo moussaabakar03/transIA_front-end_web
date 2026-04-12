@@ -19,33 +19,32 @@ export class AuthInterceptor implements HttpInterceptor {
     private router: Router
   ) {}
 
+
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const token = this.authService.getToken();
-
-    // Cloner la requête et ajouter le header Authorization si le token existe
-    let authReq = req;
-    if (token) {
-      authReq = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    }
-
-    return next.handle(authReq).pipe(
-      catchError((error: HttpErrorResponse) => {
-        // Si le serveur renvoie 401 (non autorisé), on nettoie la session
-        if (error.status === 401) {
-          this.authService.clearSession();
-          
-          // Rediriger vers la page de connexion ou session expirée
-          const currentUrl = this.router.url;
-          if (!currentUrl.includes('/login') && !currentUrl.includes('/session-expired')) {
-            this.router.navigate(['/session-expired']);
-          }
-        }
-        return throwError(() => error);
-      })
-    );
+  // Ignorer le login
+  if (req.url.includes('/login')) {
+    return next.handle(req);
   }
+
+  const token = this.authService.getToken();
+  let authReq = req;
+
+  // On n'ajoute le header que SI on a un token et SI on est côté client
+  if (token) {
+    authReq = req.clone({
+      setHeaders: { Authorization: `Bearer ${token}` }
+    });
+  }
+
+  return next.handle(authReq).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401) {
+        this.authService.clearSession();
+        this.router.navigate(['/login']);
+      }
+      return throwError(() => error);
+    })
+  );
 }
+}
+

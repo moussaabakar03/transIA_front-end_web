@@ -28,12 +28,20 @@ export interface User {
   profile: Profile;
 }
 
+// export interface LoginResponse {
+//   access: string;
+//   refresh: string;
+//   user: User;
+// }
+
 export interface LoginResponse {
-  access: string;
-  refresh: string;
-  user: User;
+  accessToken: string;
+  token: string; // Doublon souvent présent dans Spring
+  username: string;
+  fullName: string;
+  id: string;
+  roles: string[];
+  tokenType: string;
 }
-
-
 
 

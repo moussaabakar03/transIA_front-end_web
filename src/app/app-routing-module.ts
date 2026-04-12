@@ -9,14 +9,14 @@ import { ListeVehiculeComponent } from './pages/transport/vehicule/liste-vehicul
 const routes: Routes = [
 
   { path: 'login', component: AuthComponent },
-  // { path: 'vehicules', component: ListeVehiculeComponent },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
   {
     path: '',
     component: BaseComponents,
-    // canActivate: [AuthGuard],
+    canActivate: [AuthGuard],
     children: [
       { path: 'dashboard', component: DashboardComponent },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      // { path: 'dashboard', redirectTo: 'dashboard', pathMatch: 'full' },
 
       // Vehicule
       {
@@ -30,27 +30,6 @@ const routes: Routes = [
   { path: '**', redirectTo: 'dashboard' }
 
 
-  // { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-  // { path: 'login', component: AuthComponent },
-  // { path: 'dashboard', component: BaseComponents },
-
-  // {
-  //   path: '',
-  //   component: BaseComponents,
-  //   canActivate: [AuthGuard],
-  //   children: [
-  //     // Dashboard
-  //     {
-  //       path: 'dashboard',
-  //       component: DashboardComponent,
-  //       data: { roles: ['ADMIN', 'GERANT', 'USER', 'SELLER', 'MANAGER'] }
-  //     },
-
-  //     // // Users
-  //     // { path: 'roles', component: RoleComponent, data: { roles: ['GERANT'] } },
-  //     // { path: 'roles/nouveau', component: FormRoleComponent, data: { roles: ['GERANT'] } },
-  //   ]
-  // }
 
 ];
 

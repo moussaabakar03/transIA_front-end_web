@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../../coeur/services/auth-service';
 import { Router } from '@angular/router';
 import { LoginForm } from '../../../partages/models/auth.model';
@@ -9,18 +9,15 @@ import { LoginForm } from '../../../partages/models/auth.model';
   templateUrl: './auth-component.html',
   styleUrl: './auth-component.scss',
 })
-export class AuthComponent {
+export class AuthComponent implements OnInit{
  
-  // ── Champs du formulaire ──────────────────────────────────
   username: string = '';
   password: string = '';
  
-  // ── États UI ─────────────────────────────────────────────
   showPassword: boolean = false;
   isLoading: boolean = false;
   errorMessage: string = '';
  
-  // ── Année courante (footer) ───────────────────────────────
   currentYear: number = new Date().getFullYear();
  
   constructor(
@@ -28,12 +25,10 @@ export class AuthComponent {
     private router: Router
   ) {}
  
-  /** Bascule la visibilité du mot de passe */
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
  
-  /** Soumission du formulaire de connexion */
   onSubmit(): void {
     // Réinitialiser l'erreur précédente
     this.errorMessage = '';
@@ -50,7 +45,7 @@ export class AuthComponent {
  
     this.isLoading = true;
  
-     const payload: LoginForm = {
+    const payload: LoginForm = {
       username: this.username.trim(),
       password: this.password
     };
@@ -59,6 +54,10 @@ export class AuthComponent {
     this.authService.login(payload).subscribe({
       next: (response) => {
         this.isLoading = false;
+        console.log("1. Connexion Reuçue.... ", response.accessToken);
+        console.log("2. Connexion Reuçue.... ", response.fullName);
+        console.log("3. Connexion Reuçue.... ", response.roles);
+        console.log("4. Connexion Reuçue.... ", response);
         // Redirection vers le tableau de bord après connexion réussie
         this.router.navigate(['/dashboard']);
       },
@@ -69,6 +68,8 @@ export class AuthComponent {
           this.errorMessage = 'Identifiant ou mot de passe incorrect.';
         } else if (err.status === 403) {
           this.errorMessage = 'Accès refusé. Contactez votre administrateur.';
+        } else if (err.status === 500) {
+          this.errorMessage = 'Erreur côté serveur.';
         } else if (err.status === 0) {
           this.errorMessage = 'Impossible de joindre le serveur. Vérifiez votre connexion.';
         } else {
@@ -76,5 +77,11 @@ export class AuthComponent {
         }
       }
     });
+  }
+
+  ngOnInit(): void {
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/dashboard']);
+    }
   }
 }
