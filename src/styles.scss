@@ -1,1 +1,374 @@
 /* You can add global styles to this file, and also import other style files */
+/* styles.css */
+/* ============================================================
+   TRANSIA — Personnalisation du thème (Sidebar + Layout)
+   Couleur principale : #1550ee
+   Polices : Plus Jakarta Sans + Nunito
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap');
+
+/* ── VARIABLES GLOBALES ──────────────────────────────────── */
+:root {
+  --vz-primary:             #1550ee;
+  --vz-primary-rgb:         21, 80, 238;
+  --vz-primary-text-emphasis: #0e3eb8;
+  --vz-link-color:          #1550ee;
+  --vz-link-hover-color:    #3b6ef0;
+
+  /* Sidebar */
+  --vz-sidebar-bg:          #0d1b4b;
+  --vz-sidebar-width:       260px;
+
+  /* Topbar */
+  --vz-header-bg:           #ffffff;
+  --vz-header-height:       70px;
+  --vz-header-border:       rgba(21, 80, 238, 0.1);
+
+  /* Polices */
+  --vz-font-sans-serif:     'Nunito', sans-serif;
+  --vz-body-font-family:    'Nunito', sans-serif;
+}
+
+/* ── TYPOGRAPHIE GLOBALE ─────────────────────────────────── */
+body,
+.navbar-nav,
+.nav-link,
+.btn,
+input,
+select,
+textarea,
+table {
+  font-family: 'Nunito', sans-serif !important;
+}
+
+h1, h2, h3, h4, h5, h6,
+.card-title,
+.page-title,
+.navbar-brand-box .logo-lg img {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+.app-menu,
+.navbar-menu {
+  background: #0d1b4b !important;
+  border-right: 1px solid rgba(21, 80, 238, 0.15) !important;
+}
+
+/* Fond dégradé subtil sur la sidebar */
+.app-menu::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 200px;
+  background: linear-gradient(180deg, rgba(21,80,238,0.18) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Navbar brand box (logo) */
+.navbar-brand-box {
+  background: #0a1540 !important;
+  border-bottom: 1px solid rgba(21, 80, 238, 0.25) !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px !important;
+}
+
+/* Titre de section "Menu" */
+.menu-title span {
+  color: rgba(255, 255, 255, 0.35) !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+}
+
+/* Liens de navigation */
+.navbar-nav .nav-link,
+.navbar-nav .menu-link {
+  color: rgba(255, 255, 255, 0.62) !important;
+  font-family: 'Nunito', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  margin: 2px 10px !important;
+  padding: 10px 14px !important;
+  transition: all 0.25s ease !important;
+  position: relative;
+}
+
+/* Icônes dans le menu */
+.navbar-nav .nav-link i,
+.navbar-nav .menu-link i {
+  color: rgba(255, 255, 255, 0.45) !important;
+  font-size: 17px !important;
+  transition: color 0.25s ease !important;
+  min-width: 22px;
+}
+
+/* Hover sur les liens */
+.navbar-nav .nav-link:hover,
+.navbar-nav .menu-link:hover {
+  color: #ffffff !important;
+  background: rgba(21, 80, 238, 0.2) !important;
+}
+
+.navbar-nav .nav-link:hover i,
+.navbar-nav .menu-link:hover i {
+  color: #7da4f5 !important;
+}
+
+/* Lien actif */
+.navbar-nav .nav-link.active,
+.navbar-nav .menu-link.active,
+.navbar-nav .nav-link.active.menu-link {
+  color: #ffffff !important;
+  background: linear-gradient(90deg, #1550ee, #3b6ef0) !important;
+  box-shadow: 0 4px 16px rgba(21, 80, 238, 0.35) !important;
+}
+
+.navbar-nav .nav-link.active i,
+.navbar-nav .menu-link.active i {
+  color: #ffffff !important;
+}
+
+/* Barre indicatrice sur le lien actif */
+.navbar-nav .nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 3px; height: 60%;
+  background: #7da4f5;
+  border-radius: 0 3px 3px 0;
+}
+
+/* Sous-menus (dropdown collapse) */
+.navbar-nav .menu-dropdown {
+  background: rgba(0, 0, 0, 0.15) !important;
+  border-radius: 8px !important;
+  margin: 4px 10px !important;
+  padding: 4px 0 !important;
+  border-left: 2px solid rgba(21, 80, 238, 0.3) !important;
+}
+
+.navbar-nav .nav-sm .nav-link {
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  padding: 7px 16px 7px 20px !important;
+  margin: 1px 4px !important;
+  border-radius: 6px !important;
+}
+
+.navbar-nav .nav-sm .nav-link:hover {
+  color: #ffffff !important;
+  background: rgba(21, 80, 238, 0.15) !important;
+}
+
+.navbar-nav .nav-sm .nav-link.active {
+  color: #7da4f5 !important;
+  background: rgba(21, 80, 238, 0.18) !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+
+.navbar-nav .nav-sm .nav-link.active::before {
+  display: none;
+}
+
+/* Bouton hover vertical sidebar */
+#vertical-hover {
+  color: rgba(255, 255, 255, 0.4) !important;
+  transition: color 0.2s ease;
+}
+
+#vertical-hover:hover {
+  color: #7da4f5 !important;
+}
+
+/* Fond semi-transparent sidebar */
+.sidebar-background {
+  background: linear-gradient(180deg, #0a1540 0%, #0d1b4b 100%) !important;
+}
+
+/* ── TOPBAR ──────────────────────────────────────────────── */
+#page-topbar {
+  background: #ffffff !important;
+  border-bottom: 1px solid rgba(21, 80, 238, 0.1) !important;
+  box-shadow: 0 2px 16px rgba(21, 80, 238, 0.06) !important;
+}
+
+/* Icônes topbar */
+.header-item {
+  color: #374151 !important;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.header-item:hover {
+  color: #1550ee !important;
+  background: rgba(21, 80, 238, 0.07) !important;
+  border-radius: 8px;
+}
+
+/* Badges dans le topbar */
+.badge.bg-danger,
+.badge.bg-primary {
+  background-color: #1550ee !important;
+}
+
+/* ── BOUTONS ─────────────────────────────────────────────── */
+.btn-primary {
+  background: linear-gradient(135deg, #1550ee, #3b6ef0) !important;
+  border-color: #1550ee !important;
+  font-family: 'Nunito', sans-serif !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 14px rgba(21, 80, 238, 0.25) !important;
+  transition: all 0.25s ease !important;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #0e3eb8, #1550ee) !important;
+  box-shadow: 0 6px 20px rgba(21, 80, 238, 0.35) !important;
+  transform: translateY(-1px);
+}
+
+.btn-soft-primary {
+  background: rgba(21, 80, 238, 0.1) !important;
+  color: #1550ee !important;
+  border: none !important;
+}
+
+.btn-soft-primary:hover {
+  background: rgba(21, 80, 238, 0.18) !important;
+  color: #1550ee !important;
+}
+
+/* Back to top */
+#back-to-top {
+  background: linear-gradient(135deg, #1550ee, #3b6ef0) !important;
+  border: none !important;
+  box-shadow: 0 4px 16px rgba(21, 80, 238, 0.35) !important;
+}
+
+/* ── CARDS ───────────────────────────────────────────────── */
+.card {
+  border: 1px solid rgba(21, 80, 238, 0.08) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 2px 12px rgba(21, 80, 238, 0.06) !important;
+  font-family: 'Nunito', sans-serif !important;
+}
+
+.card-header {
+  border-bottom: 1px solid rgba(21, 80, 238, 0.08) !important;
+  background: transparent !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 600 !important;
+}
+
+/* ── TABLEAUX ────────────────────────────────────────────── */
+.table thead th {
+  background: rgba(21, 80, 238, 0.05) !important;
+  color: #0d1b4b !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  border-bottom: 2px solid rgba(21, 80, 238, 0.15) !important;
+}
+
+/* ── FORMULAIRES ─────────────────────────────────────────── */
+.form-control:focus,
+.form-select:focus {
+  border-color: #1550ee !important;
+  box-shadow: 0 0 0 3px rgba(21, 80, 238, 0.12) !important;
+}
+
+.form-label {
+  font-family: 'Nunito', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+}
+
+/* ── PAGINATION ──────────────────────────────────────────── */
+.page-item.active .page-link {
+  background-color: #1550ee !important;
+  border-color: #1550ee !important;
+}
+
+.page-link {
+  color: #1550ee !important;
+}
+
+.page-link:hover {
+  color: #0e3eb8 !important;
+}
+
+/* ── BREADCRUMB ──────────────────────────────────────────── */
+.breadcrumb-item.active {
+  color: #1550ee !important;
+  font-weight: 500 !important;
+}
+
+/* ── PRELOADER ───────────────────────────────────────────── */
+#preloader #status .spinner-border {
+  color: #1550ee !important;
+  border-color: #1550ee;
+  border-right-color: transparent;
+}
+
+/* ── CUSTOMIZER BUTTON ───────────────────────────────────── */
+.customizer-setting .btn-primary {
+  background: linear-gradient(135deg, #1550ee, #3b6ef0) !important;
+  border: none !important;
+  box-shadow: 0 4px 20px rgba(21, 80, 238, 0.35) !important;
+}
+
+/* ── OVERLAY SIDEBAR (mobile) ────────────────────────────── */
+.vertical-overlay {
+  background: rgba(13, 27, 75, 0.45) !important;
+  backdrop-filter: blur(2px);
+}
+
+/* ── SCROLLBAR PERSONNALISÉ ──────────────────────────────── */
+#scrollbar::-webkit-scrollbar,
+.navbar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+#scrollbar::-webkit-scrollbar-track,
+.navbar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#scrollbar::-webkit-scrollbar-thumb,
+.navbar-nav::-webkit-scrollbar-thumb {
+  background: rgba(21, 80, 238, 0.3);
+  border-radius: 4px;
+}
+
+#scrollbar::-webkit-scrollbar-thumb:hover,
+.navbar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(21, 80, 238, 0.55);
+}
+
+/* ── LOGO TRANSIA (texte de secours si image absente) ─────── */
+.logo-text-fallback {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+
+.logo-text-fallback span {
+  color: #7da4f5;
+}
+
+

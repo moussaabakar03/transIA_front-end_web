@@ -1,0 +1,103 @@
+<!-- LOGO -->
+<div class="navbar-brand-box">
+  <!-- Logo pour thème clair (light) -->
+  <a routerLink="/dashboard" class="logo logo-light">
+    <span class="logo-sm">
+      <img src="assets/images/logo-sm.png" alt="TransIa" height="22">
+    </span>
+    <span class="logo-lg">
+      <img src="assets/images/logo-light.png" alt="TransIa" height="17">
+    </span>
+  </a>
+  <!-- Logo pour thème sombre (optionnel) -->
+  <a routerLink="/dashboard" class="logo logo-dark">
+    <span class="logo-sm">
+      <img src="assets/images/logo-sm.png" alt="TransIa" height="22">
+    </span>
+    <span class="logo-lg">
+      <img src="assets/images/logo-dark.png" alt="TransIa" height="17">
+    </span>
+  </a>
+  <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
+    <i class="ri-record-circle-line"></i>
+  </button>
+</div>
+
+<div id="scrollbar">
+  <div class="container-fluid">
+    <div id="two-column-menu"></div>
+
+    <ul class="navbar-nav" id="navbar-nav">
+      <li class="menu-title"><span data-key="t-menu">Menu</span></li>
+
+      <!-- Dashboard -->
+      <li class="nav-item">
+        <a class="nav-link menu-link" data-bs-toggle="collapse" href="#sidebarDashboards" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
+          <i class="las la-tachometer-alt"></i>
+          <span data-key="t-dashboards">Tableau de bord</span>
+        </a>
+        <div class="collapse menu-dropdown" id="sidebarDashboards">
+          <ul class="nav nav-sm flex-column">
+            <li class="nav-item">
+              <a routerLink="/dashboard" routerLinkActive="active" class="nav-link" data-key="t-analytics">Vue d'ensemble</a>
+            </li>
+          </ul>
+        </div>
+      </li>
+
+      <!-- Transport -->
+      <li class="nav-item">
+        <a class="nav-link menu-link" data-bs-toggle="collapse" href="#sidebarTransport" role="button" aria-expanded="false" aria-controls="sidebarTransport">
+          <i class="las la-truck"></i>
+          <span data-key="t-transport">Transport</span>
+        </a>
+        <div class="collapse menu-dropdown" id="sidebarTransport">
+          <ul class="nav nav-sm flex-column">
+            <!-- Véhicules -->
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="collapse" href="#sidebarVehicule" role="button" aria-expanded="false" aria-controls="sidebarVehicule">
+                <i class="las la-car"></i> Véhicules
+              </a>
+              <div class="collapse menu-dropdown" id="sidebarVehicule">
+                <ul class="nav nav-sm flex-column">
+                  <li class="nav-item">
+                    <a routerLink="/vehicules/liste" routerLinkActive="active" class="nav-link">Liste</a>
+                  </li>
+                  <li class="nav-item">
+                    <a routerLink="/vehicules/ajout" routerLinkActive="active" class="nav-link">Ajouter</a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+            <!-- Autres sous-menus transport (ex: chauffeurs, itinéraires) -->
+            <li class="nav-item">
+              <a routerLink="/chauffeurs" routerLinkActive="active" class="nav-link">
+                <i class="las la-user"></i> Chauffeurs
+              </a>
+            </li>
+          </ul>
+        </div>
+      </li>
+
+      <!-- Administration (optionnel) -->
+      <li class="nav-item">
+        <a class="nav-link menu-link" data-bs-toggle="collapse" href="#sidebarAdmin" role="button" aria-expanded="false" aria-controls="sidebarAdmin">
+          <i class="las la-cog"></i>
+          <span>Administration</span>
+        </a>
+        <div class="collapse menu-dropdown" id="sidebarAdmin">
+          <ul class="nav nav-sm flex-column">
+            <li class="nav-item">
+              <a routerLink="/utilisateurs" routerLinkActive="active" class="nav-link">Utilisateurs</a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/parametres" routerLinkActive="active" class="nav-link">Paramètres</a>
+            </li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="sidebar-background"></div>
