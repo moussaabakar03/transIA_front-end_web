@@ -1,5 +1,5 @@
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { BrowserModule, provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
@@ -14,6 +14,7 @@ import { SidebarComponent } from './mise-en-pages/base-components/sidebar-compon
 import { HeaderComponent } from './mise-en-pages/base-components/header-component/header-component';
 import { FooterComponent } from './mise-en-pages/base-components/footer-component/footer-component';
 import { DashboardComponent } from './pages/dashboard-component/dashboard-component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -30,11 +31,11 @@ import { DashboardComponent } from './pages/dashboard-component/dashboard-compon
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    HttpClientModule
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideClientHydration(withEventReplay()),
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
