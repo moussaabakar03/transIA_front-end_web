@@ -1,16 +1,12 @@
-// src/app/core/guards/auth.guard.ts
-// import { Injectable } from '@angular/core';
-import { CanActivate, Router, UrlTree } from '@angular/router';
-import { Observable } from 'rxjs';
-import { AuthService } from '../services/auth-service';
-// src/app/core/guards/auth.guard.ts
+import { ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { AuthService } from '../services/auth-service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthGuard implements CanActivate {
+export class AuthGuard implements CanActivate, CanActivateChild {
 
   constructor(
     private authService: AuthService,
@@ -19,16 +15,26 @@ export class AuthGuard implements CanActivate {
 
   ) {}
 
-  canActivate(): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
+  canActivate(_route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
+    return this.checkAccess(state.url);
+  }
+
+  canActivateChild(_route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
+    return this.checkAccess(state.url);
+  }
+
+  private checkAccess(targetUrl: string): boolean | UrlTree {
     if (!isPlatformBrowser(this.platformId)) {
-      return true; 
+      return true;
     }
+
     if (this.authService.isLoggedIn()) {
       return true;
-    } else {
-      // Rediriger vers la page de connexion
-      return this.router.createUrlTree(['/login']);
     }
+
+    return this.router.createUrlTree(['/login'], {
+      queryParams: { returnUrl: targetUrl }
+    });
   }
 }
 

@@ -6,8 +6,11 @@ import { AuthGuard } from '../../../coeur/garde-auth/auth.guard';
 
 
 const routes: Routes = [
+  { path: '', pathMatch: 'full', redirectTo: 'liste' },
   { path: 'liste', component: ListeVehiculeComponent, canActivate: [AuthGuard] },
-  { path: 'ajout',   component: AjoutVehiculeComponent, canActivate: [AuthGuard] }
+  { path: 'ajout',   component: AjoutVehiculeComponent, canActivate: [AuthGuard] },
+  { path: '**', redirectTo: 'liste' }
+
   // { path: 'sortie/:stockId',   component: StockSortieComponent, canActivate: [AuthGuard] },
 ];
 
