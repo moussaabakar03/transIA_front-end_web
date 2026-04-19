@@ -31,6 +31,12 @@ const routes: Routes = [
         path: 'villes',
         loadChildren: () =>
           import('./pages/transport/ville/ville.module').then(m => m.VilleModule)
+      },
+
+      {
+        path: 'trajets',
+        loadChildren: () =>
+          import('./pages/transport/trajet/trajet-module').then(m => m.TrajetModule)
       }
 
     ]
