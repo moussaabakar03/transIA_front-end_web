@@ -1,31 +1,32 @@
+<!-- liste-vehicule-component.html -->
+
 <div class="vehicule-list-container">
-  <!-- En-tête avec titre et bouton d'ajout -->
+
+  <!-- En-tête -->
   <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
       <h4 class="mb-1 fw-bold">Gestion des véhicules</h4>
       <p class="text-muted mb-0">Consultez et gérez votre flotte de véhicules</p>
     </div>
     <div>
-      <a routerLink="/vehicules/ajout" class="btn btn-primary">
+      <!-- ✅ Ouvre le modal au lieu de naviguer -->
+      <button type="button" class="btn btn-primary" (click)="openModal()">
         <i class="las la-plus me-1"></i> Nouveau véhicule
-      </a>
+      </button>
     </div>
   </div>
 
-  <!-- Barre de recherche et filtres -->
+  <!-- Barre de recherche -->
   <div class="card mb-4">
     <div class="card-body">
       <div class="row g-3 align-items-center">
         <div class="col-md-6">
           <div class="search-box">
             <i class="las la-search"></i>
-            <input
-              type="text"
-              class="form-control"
+            <input type="text" class="form-control"
               placeholder="Rechercher par marque, modèle, immatriculation..."
               [(ngModel)]="searchTerm"
-              (input)="filterVehicules()"
-            />
+              (input)="filterVehicules()" />
           </div>
         </div>
         <div class="col-md-6 text-md-end">
@@ -40,114 +41,286 @@
     </div>
   </div>
 
-  <!-- État de chargement -->
+  <!-- Chargement -->
   <div *ngIf="isLoading" class="text-center py-5">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Chargement...</span>
-    </div>
+    <div class="spinner-border text-primary" role="status"></div>
     <p class="mt-3 text-muted">Chargement des véhicules...</p>
   </div>
 
-  <!-- Message d'erreur -->
+  <!-- Erreur liste -->
   <div *ngIf="errorMessage && !isLoading" class="alert alert-danger" role="alert">
     <i class="las la-exclamation-triangle me-2"></i> {{ errorMessage }}
     <button class="btn btn-sm btn-outline-danger ms-3" (click)="loadVehicules()">Réessayer</button>
   </div>
 
-  <!-- Table des véhicules -->
+  <!-- Tableau -->
   <div *ngIf="!isLoading && !errorMessage" class="card">
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-hover table-nowrap align-middle mb-0">
           <thead class="table-light">
             <tr>
-              <th scope="col" style="width: 60px;">#</th>
-              <th scope="col">Véhicule</th>
-              <th scope="col">Immatriculation</th>
-              <th scope="col">Capacité</th>
-              <th scope="col">Statut</th>
-              <th scope="col" style="width: 120px;">Actions</th>
+              <th style="width:60px">#</th>
+              <th>Véhicule</th>
+              <th>Immatriculation</th>
+              <th>Capacité</th>
+              <th>Statut</th>
+              <th style="width:120px">Actions</th>
             </tr>
           </thead>
           <tbody>
+
             <tr *ngIf="filteredVehicules.length === 0">
               <td colspan="6" class="text-center py-5">
                 <div class="py-4">
-                  <i class="las la-car-side fs-1 text-muted mb-3"></i>
+                  <i class="las la-car-side fs-1 text-muted mb-3 d-block"></i>
                   <h5>Aucun véhicule trouvé</h5>
                   <p class="text-muted">Commencez par ajouter un nouveau véhicule.</p>
-                  <a routerLink="/vehicules/ajout" class="btn btn-primary btn-sm">
+                  <button type="button" class="btn btn-primary btn-sm" (click)="openModal()">
                     <i class="las la-plus me-1"></i> Ajouter un véhicule
-                  </a>
+                  </button>
                 </div>
               </td>
             </tr>
 
             <tr *ngFor="let vehicule of filteredVehicules; let i = index">
-              <td>
-                <span class="fw-semibold text-primary">#{{ vehicule.id }}</span>
-              </td>
+              <td><span class="fw-semibold text-primary">#{{ i+1 }}</span></td>
               <td>
                 <div class="d-flex align-items-center">
                   <div class="flex-shrink-0 me-3">
                     <div class="avatar-sm rounded bg-light d-flex align-items-center justify-content-center">
-                      <img
-                        *ngIf="vehicule.image; else noImage"
-                        [src]="vehicule.image"
-                        alt="{{ vehicule.marque }}"
+                      <img *ngIf="vehicule.image; else noImage"
+                        [src]="vehicule.image" [alt]="vehicule.marque"
                         class="img-fluid rounded"
-                        style="max-width: 40px; max-height: 40px; object-fit: cover;"
-                        onerror="this.src='assets/images/vehicule-placeholder.png'"
-                      />
+                        style="max-width:40px;max-height:40px;object-fit:cover"
+                        onerror="this.src='assets/images/vehicule-placeholder.png'" />
                       <ng-template #noImage>
                         <i class="las la-car fs-3 text-primary"></i>
                       </ng-template>
                     </div>
                   </div>
-                  <div class="flex-grow-1">
+                  <div>
                     <h6 class="mb-0">{{ vehicule.marque }} {{ vehicule.modele }}</h6>
                     <small class="text-muted">{{ vehicule.marque }}</small>
                   </div>
                 </div>
               </td>
+              <td><span class="fw-medium">{{ vehicule.immatriculation }}</span></td>
+              <td><i class="las la-user-friends me-1 text-muted"></i>{{ vehicule.capacite }} places</td>
               <td>
-                <span class="fw-medium">{{ vehicule.immatriculation }}</span>
-              </td>
-              <td>
-                <i class="las la-user-friends me-1 text-muted"></i>
-                {{ vehicule.capacite }} places
-              </td>
-              <td>
-                <!-- <span class="badge rounded-pill" [ngClass]="getStatusBadgeClass(vehicule.status)"> -->
-                <span class="badge rounded-pill">
+                <span class="badge rounded-pill"
+                  [class.bg-success]="vehicule.status === 1"
+                  [class.bg-warning]="vehicule.status === 2"
+                  [class.bg-danger]="vehicule.status === 3">
                   {{ vehicule.status }}
                 </span>
               </td>
               <td>
                 <div class="hstack gap-2">
-                  <button class="btn btn-soft-primary btn-sm" (click)="onView(vehicule.id)" title="Voir détails">
+                  <button class="btn btn-soft-primary btn-sm" title="Voir" (click)="onView(vehicule.id!)">
                     <i class="las la-eye"></i>
                   </button>
-                  <button class="btn btn-soft-info btn-sm" (click)="onEdit(vehicule.id)" title="Modifier">
+                  <button class="btn btn-soft-info btn-sm" title="Modifier" (click)="onEdit(vehicule.id!)">
                     <i class="las la-pen"></i>
                   </button>
-                  <button class="btn btn-soft-danger btn-sm" (click)="onDelete(vehicule.id)" title="Supprimer">
+                  <button class="btn btn-soft-danger btn-sm" title="Supprimer" (click)="onDelete(vehicule.id!)">
                     <i class="las la-trash-alt"></i>
                   </button>
                 </div>
               </td>
             </tr>
+
           </tbody>
         </table>
       </div>
     </div>
-    <!-- Pied de carte avec pagination (optionnel) -->
     <div class="card-footer bg-transparent border-0 py-3" *ngIf="filteredVehicules.length > 0">
-      <div class="d-flex justify-content-between align-items-center">
-        <span class="text-muted">Affichage de {{ filteredVehicules.length }} véhicule(s)</span>
-        <!-- Pagination placeholder si nécessaire -->
-        <!-- <nav><ul class="pagination pagination-sm mb-0">...</ul></nav> -->
+      <span class="text-muted">Affichage de {{ filteredVehicules.length }} véhicule(s)</span>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ╔══════════════════════════════════════════════════════╗ -->
+<!-- ║         MODAL — AJOUT VÉHICULE                      ║ -->
+<!-- ╚══════════════════════════════════════════════════════╝ -->
+<div class="modal-overlay" [class.show]="isModalOpen" (click)="onOverlayClick($event)">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+
+    <!-- En-tête modal -->
+    <div class="modal-box-header">
+      <div class="modal-title-group">
+        <div class="modal-icon">
+          <i class="las la-truck"></i>
+        </div>
+        <div>
+          <h5 id="modalTitle">{{ modalMode === 'ajout' ? 'Nouveau véhicule' : 'Modifier le véhicule' }}</h5>
+          <p>{{ modalMode === 'ajout' ? 'Renseignez les informations du véhicule' : 'Modifiez les informations du véhicule' }}</p>
+        </div>
+      </div>
+      <button type="button" class="modal-close-btn" (click)="closeModal()" aria-label="Fermer">
+        <i class="las la-times"></i>
+      </button>
+    </div>
+
+    <!-- Corps modal -->
+    <div class="modal-box-body">
+
+      <!-- Alertes -->
+      <div *ngIf="formError" class="form-alert form-alert-error">
+        <i class="las la-exclamation-circle"></i>
+        <span>{{ formError }}</span>
+      </div>
+      <div *ngIf="formSuccess" class="form-alert form-alert-success">
+        <i class="las la-check-circle"></i>
+        <span>{{ formSuccess }}</span>
+      </div>
+
+      <div class="modal-form-grid">
+
+        <!-- Colonne gauche : formulaire -->
+        <div class="modal-form-fields">
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label" for="m-marque">Marque</label>
+              <div class="input-icon-wrap">
+                <i class="las la-tag"></i>
+                <input id="m-marque" name="marque" type="text" class="form-control"
+                  [(ngModel)]="vehiculeForm.marque" [disabled]="isSubmitting"
+                  (ngModelChange)="onFieldChange('marque')"
+                  placeholder="Ex : Toyota" />
+              </div>
+              <div *ngIf="formErrors.marque" class="field-error">
+                <i class="las la-exclamation-circle"></i>
+                {{ formErrors.marque }}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="m-modele">Modèle</label>
+              <div class="input-icon-wrap">
+                <i class="las la-car"></i>
+                <input id="m-modele" name="modele" type="text" class="form-control"
+                  [(ngModel)]="vehiculeForm.modele" [disabled]="isSubmitting"
+                  (ngModelChange)="onFieldChange('modele')"
+                  placeholder="Ex : Hiace" />
+              </div>
+              <div *ngIf="formErrors.modele" class="field-error">
+                <i class="las la-exclamation-circle"></i>
+                {{ formErrors.modele }}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="m-immat">Immatriculation</label>
+              <div class="input-icon-wrap">
+                <i class="las la-id-card"></i>
+                <input id="m-immat" name="immatriculation" type="text" class="form-control immat-input"
+                  [(ngModel)]="vehiculeForm.immatriculation" [disabled]="isSubmitting"
+                  (ngModelChange)="onFieldChange('immatriculation')"
+                  placeholder="Ex : LT-245-AB" />
+              </div>
+              <div *ngIf="formErrors.immatriculation" class="field-error">
+                <i class="las la-exclamation-circle"></i>
+                {{ formErrors.immatriculation }}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="m-capacite">Capacité (places)</label>
+              <div class="input-icon-wrap">
+                <i class="las la-users"></i>
+                <input id="m-capacite" name="capacite" type="number" min="1" class="form-control"
+                  [(ngModel)]="vehiculeForm.capacite" [disabled]="isSubmitting"
+                  (ngModelChange)="onFieldChange('capacite')"
+                  placeholder="Ex : 14" />
+              </div>
+              <div *ngIf="formErrors.capacite" class="field-error">
+                <i class="las la-exclamation-circle"></i>
+                {{ formErrors.capacite }}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="m-status">Statut</label>
+              <div class="input-icon-wrap">
+                <i class="las la-toggle-on"></i>
+                <select id="m-status" name="status" class="form-select"
+                  [(ngModel)]="vehiculeForm.statut" [disabled]="isSubmitting">
+                  <option *ngFor="let opt of statusOptions" [ngValue]="opt.value">
+                    {{ opt.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="m-image">Image URL</label>
+              <div class="input-icon-wrap">
+                <i class="las la-image"></i>
+                <input id="m-image" name="image" type="url" class="form-control"
+                  [(ngModel)]="vehiculeForm.image" [disabled]="isSubmitting"
+                  placeholder="https://..." />
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Colonne droite : aperçu -->
+        <div class="modal-preview">
+          <p class="preview-label">Aperçu en direct</p>
+          <div class="preview-card">
+            <div class="preview-img-box">
+              <img *ngIf="vehiculeForm.image; else previewDefault"
+                [src]="vehiculeForm.image" [alt]="vehiculeForm.marque"
+                class="preview-img" />
+              <ng-template #previewDefault>
+                <div class="preview-placeholder">
+                  <i class="las la-car-side"></i>
+                </div>
+              </ng-template>
+            </div>
+            <div class="preview-info">
+              <div class="preview-title">
+                {{ vehiculeForm.marque || 'Marque' }} {{ vehiculeForm.modele || 'Modèle' }}
+              </div>
+              <div class="preview-immat">
+                {{ vehiculeForm.immatriculation || 'LT-XXX-XX' }}
+              </div>
+              <div class="preview-row">
+                <span>Capacité</span>
+                <span>{{ vehiculeForm.capacite || 0 }} places</span>
+              </div>
+              <div class="preview-row">
+                <span>Statut</span>
+                <span class="preview-status-badge"
+                  [class.s-actif]="vehiculeForm.statut === 'ACTIF'"
+                  [class.s-maint]="vehiculeForm.statut === 'MAINTENANCE'"
+                  [class.s-inactif]="vehiculeForm.statut === 'INACTIF'">
+                  {{ vehiculeForm.statut || '—' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
+
+    <!-- Pied modal -->
+    <div class="modal-box-footer">
+      <button type="button" class="btn btn-light" (click)="closeModal()" [disabled]="isSubmitting">
+        Annuler
+      </button>
+      <button type="button" class="btn btn-primary" (click)="submitForm()" [disabled]="isSubmitting">
+        <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status"></span>
+        <i *ngIf="!isSubmitting" class="las la-save me-1"></i>
+        {{ isSubmitting ? (modalMode === 'ajout' ? 'Enregistrement...' : 'Modification...') : (modalMode === 'ajout' ? 'Enregistrer' : 'Modifier') }}
+      </button>
+    </div>
+
   </div>
 </div>
