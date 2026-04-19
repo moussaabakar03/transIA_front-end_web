@@ -85,13 +85,20 @@
                 </ul>
               </div>
             </li>
-
-            
-            <!-- Autres sous-menus transport (ex: chauffeurs, itinéraires) -->
             <li class="nav-item">
-              <a routerLink="/chauffeurs" routerLinkActive="active" class="nav-link">
-                <i class="las la-user"></i> Chauffeurs
+              <a class="nav-link" data-bs-toggle="collapse" href="#sidebarTrajet" role="button" aria-expanded="false" aria-controls="sidebarTrajet">
+                <i class="las la-route"></i> Trajets
               </a>
+              <div class="collapse menu-dropdown" id="sidebarTrajet">
+                <ul class="nav nav-sm flex-column">
+                  <li class="nav-item">
+                    <a routerLink="/trajets/liste" routerLinkActive="active" class="nav-link">Liste</a>
+                  </li>
+                  <li class="nav-item">
+                    <a routerLink="/trajets/ajout" routerLinkActive="active" class="nav-link">Ajouter</a>
+                  </li>
+                </ul>
+              </div>
             </li>
           </ul>
         </div>
@@ -101,15 +108,15 @@
       <li class="nav-item">
         <a class="nav-link menu-link" data-bs-toggle="collapse" href="#sidebarAdmin" role="button" aria-expanded="false" aria-controls="sidebarAdmin">
           <i class="las la-cog"></i>
-          <span>Administration</span>
+          <span>Utilisateurs</span>
         </a>
         <div class="collapse menu-dropdown" id="sidebarAdmin">
           <ul class="nav nav-sm flex-column">
             <li class="nav-item">
-              <a routerLink="/utilisateurs" routerLinkActive="active" class="nav-link">Utilisateurs</a>
+              <a routerLink="/utilisateurs/liste" routerLinkActive="active" class="nav-link">Chauffeurs</a>
             </li>
             <li class="nav-item">
-              <a routerLink="/parametres" routerLinkActive="active" class="nav-link">Paramètres</a>
+              <a routerLink="/clients/liste" routerLinkActive="active" class="nav-link">Clients</a>
             </li>
           </ul>
         </div>

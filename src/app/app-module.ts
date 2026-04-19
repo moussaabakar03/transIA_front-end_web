@@ -15,6 +15,7 @@ import { HeaderComponent } from './mise-en-pages/base-components/header-componen
 import { FooterComponent } from './mise-en-pages/base-components/footer-component/footer-component';
 import { DashboardComponent } from './pages/dashboard-component/dashboard-component';
 import { HttpClientModule } from '@angular/common/http';
+// import { ListeTrajetCompent } from './pages/transport/trajet/liste-trajet-compent/liste-trajet-compent';
 // import { ListeVilleComponent } from './pages/transport/ville/liste-ville-component/liste-ville-component';
 // import { AjoutVilleComponent } from './pages/transport/ville/ajout-ville-component/ajout-ville-component';
 
@@ -29,6 +30,7 @@ import { HttpClientModule } from '@angular/common/http';
     HeaderComponent,
     FooterComponent,
     DashboardComponent,
+    // ListeTrajetCompent,
     // ListeVilleComponent,
     // AjoutVilleComponent
   ],
