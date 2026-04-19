@@ -69,6 +69,24 @@
                 </ul>
               </div>
             </li>
+
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="collapse" href="#sidebarVille" role="button" aria-expanded="false" aria-controls="sidebarVille">
+                <i class="las la-city"></i> Villes
+              </a>
+              <div class="collapse menu-dropdown" id="sidebarVille">
+                <ul class="nav nav-sm flex-column">
+                  <li class="nav-item">
+                    <a routerLink="/villes/liste" routerLinkActive="active" class="nav-link">Liste</a>
+                  </li>
+                  <li class="nav-item">
+                    <a routerLink="/villes/ajout" routerLinkActive="active" class="nav-link">Ajouter</a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+
+            
             <!-- Autres sous-menus transport (ex: chauffeurs, itinéraires) -->
             <li class="nav-item">
               <a routerLink="/chauffeurs" routerLinkActive="active" class="nav-link">

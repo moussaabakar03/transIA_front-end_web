@@ -1,5 +1,5 @@
 export interface Vehicule {
-  id: number;
+  id?: number;
   marque: string;
   modele: string;
   immatriculation: string;

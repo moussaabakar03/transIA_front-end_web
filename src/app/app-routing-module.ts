@@ -15,7 +15,10 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     canActivateChild: [AuthGuard],
     children: [
-      { path: 'dashboard', component: DashboardComponent },
+      { path: 'dashboard', 
+        component: DashboardComponent,
+        data: { roles: ['ROLE_ADMIN', 'AGENT_ACCUEIL'] }
+      },
 
       // Vehicule
       {
@@ -23,6 +26,12 @@ const routes: Routes = [
         loadChildren: () =>
           import('./pages/transport/vehicule/vehicule-module').then(m => m.VehiculeModule)
       },
+
+      {
+        path: 'villes',
+        loadChildren: () =>
+          import('./pages/transport/ville/ville.module').then(m => m.VilleModule)
+      }
 
     ]
   },

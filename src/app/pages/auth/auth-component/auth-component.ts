@@ -74,6 +74,8 @@ export class AuthComponent implements OnInit{
           this.errorMessage = 'Accès refusé. Contactez votre administrateur.';
         } else if (err.status === 0) {
           this.errorMessage = 'Impossible de joindre le serveur. Vérifiez votre connexion.';
+        } else if (err.status === 500) {
+          this.errorMessage = 'Une erreur est survenue ou Identifiants incorrect.';
         } else {
           this.errorMessage = 'Une erreur est survenue. Veuillez réessayer.';
         }

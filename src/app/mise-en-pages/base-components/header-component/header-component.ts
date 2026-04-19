@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../../coeur/services/auth-service';
+import { LoginResponse, User } from '../../../partages/models/auth.model';
 
 @Component({
   selector: 'app-header-component',
@@ -10,6 +11,8 @@ import { AuthService } from '../../../coeur/services/auth-service';
 export class HeaderComponent implements OnInit {
   currentUsername: string = '';
 
+  utilisateurConnecter?: LoginResponse | null;
+
 
   constructor(
     private authService: AuthService
@@ -19,6 +22,8 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
     // Récupération du nom au chargement du composant
     this.currentUsername = this.authService.getUserName() || 'Utilisateur';
+
+    this.utilisateurConnecter = this.authService.getUser();
   }
   
 
