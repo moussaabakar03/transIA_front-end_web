@@ -18,4 +18,17 @@ export class VehiculeService {
   create(payload: VehiculePayload): Observable<Vehicule> {
     return this.http.post<Vehicule>(`${environment.backendurl}/vehicule`, payload);
   }
+
+  update(id: string, payload: VehiculePayload): Observable<Vehicule> {
+    return this.http.put<Vehicule>(`${environment.backendurl}/vehicule/${id}`, payload);
+  }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${environment.backendurl}/vehicule/${id}`);
+  }
+
+  getById(id: string): Observable<Vehicule> {
+    return this.http.get<Vehicule>(`${environment.backendurl}/vehicule/${id}`);
+  }
+  
 }

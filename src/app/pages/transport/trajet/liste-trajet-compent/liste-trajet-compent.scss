@@ -1,4 +1,4 @@
-// liste-vehicule-component.scss
+// liste-trajet-compent.scss
 
 $primary:     #1550ee;
 $primary-dim: rgba(21, 80, 238, 0.08);
@@ -37,7 +37,7 @@ $gray:        #6B7280;
   background: #fff;
   border-radius: 20px;
   width: 100%;
-  max-width: 860px;
+  max-width: 900px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 24px 60px rgba(21, 80, 238, 0.18), 0 8px 20px rgba(0,0,0,0.08);
@@ -135,9 +135,8 @@ $gray:        #6B7280;
 // ─── GRILLE ──────────────────────────────────────────────────
 .modal-form-grid {
   display: grid;
-  grid-template-columns: 1fr 220px;
+  grid-template-columns: 1fr;
   gap: 24px;
-  @media (max-width: 680px) { grid-template-columns: 1fr; }
 }
 
 // ─── CHAMPS ──────────────────────────────────────────────────
@@ -165,7 +164,6 @@ $gray:        #6B7280;
     &:focus { border-color: $primary; background: #fff; box-shadow: 0 0 0 3px rgba($primary, 0.1); }
     &::placeholder { color: #9CA3AF; }
   }
-  .immat-input { font-family: 'Courier New', monospace; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
 }
 
 .form-label {
@@ -185,56 +183,27 @@ $gray:        #6B7280;
   font-family: 'Nunito', sans-serif;
 }
 
-// ─── APERÇU ──────────────────────────────────────────────────
-.modal-preview { display: flex; flex-direction: column; }
-
-.preview-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: $gray;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  margin-bottom: 10px;
+// ─── SEARCH BOX ──────────────────────────────────────────────
+.search-box {
+  position: relative;
+  i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: $gray; font-size: 16px; pointer-events: none; }
+  .form-control { padding-left: 38px; }
 }
 
-.preview-card {
-  background: #F8F9FF;
-  border: 1.5px solid rgba($primary, 0.1);
-  border-radius: 14px;
-  overflow: hidden;
-  flex: 1;
+// ─── TRAJET STYLE ────────────────────────────────────────────
+.trajet-route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
 }
 
-.preview-img-box { width: 100%; height: 120px; background: #EEF1FA; display: flex; align-items: center; justify-content: center; }
-.preview-img     { width: 100%; height: 120px; object-fit: cover; }
-
-.preview-placeholder {
-  width: 100%; height: 120px;
-  display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, #EEF1FA, #E0E8FF);
-  i { font-size: 44px; color: rgba($primary, 0.25); }
-}
-
-.preview-info { padding: 14px; }
-
-.preview-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 14px; font-weight: 700; color: $dark; margin-bottom: 4px;
-}
-
-.preview-immat {
-  font-family: 'Courier New', monospace;
-  font-size: 11px; font-weight: 700; color: $gray;
-  background: #fff; border: 1px solid #DEE2E6; border-radius: 4px;
-  padding: 2px 8px; display: inline-block; margin-bottom: 10px; letter-spacing: 1px;
-}
-
-.preview-row {
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 12px; color: $gray;
-  padding: 4px 0; border-top: 1px solid rgba($primary, 0.06);
-  font-family: 'Nunito', sans-serif;
+.trajet-ville {
+  background: $primary-dim;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  color: $primary;
 }
 
 // DETAIL BLOCKS (Mode Visualisation)
@@ -273,14 +242,15 @@ $gray:        #6B7280;
   font-weight: 500;
   color: $dark;
   word-break: break-word;
+  font-weight: 600;
+
 }
 
-.preview-status-badge {
-  font-size: 10px; font-weight: 700; padding: 2px 8px;
-  border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;
-  &.s-actif   { background: rgba(16,185,129,0.1); color: #059669; }
-  &.s-maint   { background: rgba(245,158,11,0.1); color: #D97706; }
-  &.s-inactif { background: rgba(239,68,68,0.1);  color: #DC2626; }
+
+.trajet-datetime {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 // ─── PIED ────────────────────────────────────────────────────
@@ -298,11 +268,4 @@ $gray:        #6B7280;
     box-shadow: 0 4px 14px rgba($primary, 0.28); transition: all 0.25s ease;
     &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 20px rgba($primary, 0.36); }
   }
-}
-
-// ─── SEARCH BOX ──────────────────────────────────────────────
-.search-box {
-  position: relative;
-  i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: $gray; font-size: 16px; pointer-events: none; }
-  .form-control { padding-left: 38px; }
 }

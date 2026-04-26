@@ -1,0 +1,234 @@
+<div class="trajet-form-page">
+  <div class="d-flex align-items-center justify-content-between mb-4 page-head">
+    <div>
+      <h4 class="mb-1 fw-bold">Ajouter un trajet</h4>
+      <p class="text-muted mb-0">Renseignez les informations nécessaires pour enregistrer un nouveau trajet.</p>
+    </div>
+    <button type="button" class="btn btn-soft-secondary" (click)="cancel()">
+      Retour à la liste
+    </button>
+  </div>
+
+  <!-- Chargement -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-3 text-muted">Chargement des données...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="row g-4">
+    <div class="col-lg-8">
+      <div class="card form-card">
+        <div class="card-body">
+          <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+            {{ errorMessage }}
+          </div>
+
+          <div *ngIf="successMessage" class="alert alert-success" role="alert">
+            {{ successMessage }}
+          </div>
+
+          <form novalidate>
+            <div class="row g-3">
+
+              <!-- Ville de départ -->
+              <div class="col-md-6">
+                <label class="form-label" for="villeDep">Ville de départ</label>
+                <select
+                  id="villeDep"
+                  name="villeDepartId"
+                  class="form-select"
+                  [(ngModel)]="trajetForm.villeDepartId"
+                  [disabled]="isSubmitting"
+                >
+                  <option value="">-- Sélectionner --</option>
+                  <option *ngFor="let ville of villes" [value]="ville.id">
+                    {{ ville.nomVille }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Ville d'arrivée -->
+              <div class="col-md-6">
+                <label class="form-label" for="villeArr">Ville d'arrivée</label>
+                <select
+                  id="villeArr"
+                  name="villeArriveeId"
+                  class="form-select"
+                  [(ngModel)]="trajetForm.villeArriveeId"
+                  [disabled]="isSubmitting"
+                >
+                  <option value="">-- Sélectionner --</option>
+                  <option *ngFor="let ville of villes" [value]="ville.id">
+                    {{ ville.nomVille }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Véhicule -->
+              <div class="col-md-6">
+                <label class="form-label" for="vehicule">Véhicule</label>
+                <select
+                  id="vehicule"
+                  name="vehiculeId"
+                  class="form-select"
+                  [(ngModel)]="trajetForm.vehiculeId"
+                  [disabled]="isSubmitting"
+                >
+                  <option value="">-- Sélectionner --</option>
+                  <option *ngFor="let vehicule of vehicules" [value]="vehicule.id">
+                    {{ vehicule.marque }} {{ vehicule.modele }} - {{ vehicule.immatriculation }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Distance -->
+              <div class="col-md-6">
+                <label class="form-label" for="distance">Distance (km)</label>
+                <input
+                  id="distance"
+                  name="distance"
+                  type="number"
+                  min="1"
+                  step="0.1"
+                  class="form-control"
+                  [(ngModel)]="trajetForm.distance"
+                  [disabled]="isSubmitting"
+                  placeholder="Ex: 150"
+                />
+              </div>
+
+              <!-- Durée estimée -->
+              <div class="col-md-6">
+                <label class="form-label" for="duree">Durée estimée</label>
+                <input
+                  id="duree"
+                  name="dureeEstimee"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="trajetForm.dureeEstimee"
+                  [disabled]="isSubmitting"
+                  placeholder="Ex: 2h 30m"
+                />
+              </div>
+
+              <!-- Tarif -->
+              <div class="col-md-6">
+                <label class="form-label" for="tarif">Tarif (FCFA)</label>
+                <input
+                  id="tarif"
+                  name="tarif"
+                  type="number"
+                  min="1"
+                  step="100"
+                  class="form-control"
+                  [(ngModel)]="trajetForm.tarif"
+                  [disabled]="isSubmitting"
+                  placeholder="Ex: 5000"
+                />
+              </div>
+
+              <!-- Date de départ -->
+              <div class="col-md-6">
+                <label class="form-label" for="dateDepart">Date de départ</label>
+                <input
+                  id="dateDepart"
+                  name="dateDepart"
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="trajetForm.dateDepart"
+                  [disabled]="isSubmitting"
+                />
+              </div>
+
+              <!-- Heure de départ -->
+              <div class="col-md-6">
+                <label class="form-label" for="heureDepart">Heure de départ</label>
+                <input
+                  id="heureDepart"
+                  name="heureDepart"
+                  type="time"
+                  class="form-control"
+                  [(ngModel)]="trajetForm.heureDepart"
+                  [disabled]="isSubmitting"
+                />
+              </div>
+
+              <!-- Statut -->
+              <div class="col-md-6">
+                <label class="form-label" for="statut">Statut</label>
+                <select
+                  id="statut"
+                  name="statut"
+                  class="form-select"
+                  [(ngModel)]="trajetForm.statut"
+                  [disabled]="isSubmitting"
+                >
+                  <option *ngFor="let option of statusOptions" [ngValue]="option.value">
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+
+            </div>
+
+            <div class="form-actions mt-4">
+              <button type="button" class="btn btn-light" (click)="cancel()" [disabled]="isSubmitting">
+                Annuler
+              </button>
+              <button type="button" class="btn btn-primary" (click)="submit()" [disabled]="isSubmitting">
+                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                {{ isSubmitting ? 'Enregistrement...' : 'Enregistrer le trajet' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card helper-card">
+        <div class="card-body">
+          <h5 class="card-title mb-3">Résumé du trajet</h5>
+          <div class="summary-box">
+            <div class="summary-item">
+              <span class="summary-label">De</span>
+              <span class="summary-value">
+                {{ getVilleNom(trajetForm.villeDepartId) || '—' }}
+              </span>
+            </div>
+            <div class="summary-arrow">
+              <i class="las la-arrow-right"></i>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">À</span>
+              <span class="summary-value">
+                {{ getVilleNom(trajetForm.villeArriveeId) || '—' }}
+              </span>
+            </div>
+          </div>
+
+          <hr />
+
+          <div class="summary-details">
+            <div class="detail-row">
+              <span class="detail-label">Distance</span>
+              <span class="detail-value">{{ trajetForm.distance || 0 }} km</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Durée estimée</span>
+              <span class="detail-value">{{ trajetForm.dureeEstimee || '—' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Tarif</span>
+              <span class="detail-value text-success fw-bold">{{ trajetForm.tarif || 0 }} FCFA</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Départ</span>
+              <span class="detail-value">{{ trajetForm.dateDepart || '—' }} {{ trajetForm.heureDepart || '' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

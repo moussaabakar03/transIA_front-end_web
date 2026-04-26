@@ -7,7 +7,6 @@ import { AuthGuard } from './coeur/garde-auth/auth.guard';
 
 const routes: Routes = [
   { path: 'login', component: AuthComponent },
-  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
 
   {
     path: '',
@@ -15,15 +14,42 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     canActivateChild: [AuthGuard],
     children: [
-      { path: 'dashboard', component: DashboardComponent },
+      { 
+        path: '', 
+        pathMatch: 'full', 
+        redirectTo: 'dashboard' 
+      },
+      
+      { 
+        path: 'dashboard', 
+        component: DashboardComponent,
+        data: { roles: ['ROLE_ADMIN', 'AGENT_ACCUEIL'] }
+      },
 
       // Vehicule
       {
         path: 'vehicules',
         loadChildren: () =>
-          import('./pages/transport/vehicule/vehicule-module').then(m => m.VehiculeModule)
+          import('./pages/transport/vehicule/vehicule-module').then(m => m.VehiculeModule),
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard]
       },
 
+      {
+        path: 'villes',
+        loadChildren: () =>
+          import('./pages/transport/ville/ville.module').then(m => m.VilleModule),
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard]
+      },
+
+      {
+        path: 'trajets',
+        loadChildren: () =>
+          import('./pages/transport/trajet/trajet-module').then(m => m.TrajetModule),
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard]
+      }
     ]
   },
 
