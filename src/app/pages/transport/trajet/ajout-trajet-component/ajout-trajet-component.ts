@@ -7,6 +7,8 @@ import { VehiculeService } from '../../../../coeur/services/vehicule-service';
 import { StatutTrajet } from '../../../../partages/models/trajet';
 import { Ville } from '../../../../partages/models/ville';
 import { Vehicule } from '../../../../partages/models/vehicule';
+import { User } from '../../../../partages/models/users';
+import { UserService } from '../../../../coeur/services/user-service';
 
 interface TrajetPayload {
   villeDepartId: string;
@@ -18,6 +20,7 @@ interface TrajetPayload {
   dateDepart: string;
   heureDepart: string;
   statut: StatutTrajet;
+  chauffeurId: number | null;
 }
 
 @Component({
@@ -36,8 +39,10 @@ export class AjoutTrajetComponent implements OnInit {
     tarif: 0,
     dateDepart: '',
     heureDepart: '',
-    statut: StatutTrajet.PROGRAMME
+    statut: StatutTrajet.PROGRAMME,
+    chauffeurId: null           
   };
+  chauffeurs: User[] = []; 
 
   villes: Ville[] = [];
   vehicules: Vehicule[] = [];
@@ -59,7 +64,8 @@ export class AjoutTrajetComponent implements OnInit {
     private villeService: VilleService,
     private vehiculeService: VehiculeService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
@@ -82,7 +88,7 @@ export class AjoutTrajetComponent implements OnInit {
       }
     });
 
-    this.vehiculeService.getAll().subscribe({
+    this.vehiculeService.getDisponibles().subscribe({
       next: (data) => {
         this.vehicules = data || [];
         this.isLoading = false;
@@ -94,6 +100,21 @@ export class AjoutTrajetComponent implements OnInit {
         this.isLoading = false;
       }
     });
+
+     this.userService.getChauffeurs().subscribe({
+      next: (data) => {
+        this.chauffeurs = data || [];
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Erreur chargement chauffeurs', err)
+    });
+
+
+  }
+
+  getChauffeurNom(chauffeurId: number | null): string {
+    const c = this.chauffeurs.find(ch => ch.id === chauffeurId);
+    return c ? `${c.fullName || ''} ${c.username}` : '';
   }
 
   getVilleNom(villeId: string): string {
@@ -153,7 +174,8 @@ export class AjoutTrajetComponent implements OnInit {
       tarif: Number(this.trajetForm.tarif),
       dateDepart: this.trajetForm.dateDepart,
       heureDepart: this.trajetForm.heureDepart,
-      statut: Number(this.trajetForm.statut)
+      statut: Number(this.trajetForm.statut),
+      chauffeurId: this.trajetForm.chauffeurId 
     };
   }
 
@@ -194,6 +216,10 @@ export class AjoutTrajetComponent implements OnInit {
       return 'L\'heure de départ est obligatoire.';
     }
 
+    if (!payload.chauffeurId) {
+      return 'Le chauffeur est obligatoire.';
+    }
+
     return '';
   }
 
@@ -207,7 +233,8 @@ export class AjoutTrajetComponent implements OnInit {
       tarif: 0,
       dateDepart: '',
       heureDepart: '',
-      statut: StatutTrajet.PROGRAMME
+      statut: StatutTrajet.PROGRAMME,
+       chauffeurId: null
     };
   }
 }

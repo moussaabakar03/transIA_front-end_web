@@ -1,23 +1,22 @@
-<div id="layout-wrapper">
-  <header id="page-topbar">
-    <div class="layout-width">
-      <app-header-component></app-header-component>
-    </div>
-  </header>
-
-  <div class="app-menu navbar-menu">
-    <app-sidebar-component></app-sidebar-component>
-  </div>
-
-  <div class="vertical-overlay"></div>
-
-  <div class="main-content">
-    <div class="page-content">
+<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+     data-header-position="fixed">
+  <app-sidebar-component></app-sidebar-component>
+  <!-- <app-base-components></app-base-components> -->
+  <div class="body-wrapper">
+    <!--  Header Start -->
+    <app-header-component></app-header-component>
+    <!--  Header End -->
+    <div class="body-wrapper-inner">
       <div class="container-fluid">
-        <router-outlet></router-outlet>
+        <!--  Row 1 -->
+        <div class="row">
+          <router-outlet></router-outlet>
+            <!-- <app-dashboard-component></app-dashboard-component> -->
+        </div>
+        <app-footer-component></app-footer-component>
       </div>
     </div>
-
-    <app-footer-component></app-footer-component>
   </div>
 </div>
+
+

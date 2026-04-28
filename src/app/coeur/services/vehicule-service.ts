@@ -30,5 +30,9 @@ export class VehiculeService {
   getById(id: string): Observable<Vehicule> {
     return this.http.get<Vehicule>(`${environment.backendurl}/vehicule/${id}`);
   }
-  
+
+  getDisponibles(): Observable<Vehicule[]> {
+    return this.http.get<Vehicule[]>(`${environment.backendurl}/vehicule/disponible`);
+  }
+    
 }

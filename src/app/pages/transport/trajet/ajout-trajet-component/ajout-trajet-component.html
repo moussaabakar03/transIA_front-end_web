@@ -75,8 +75,30 @@
                   [disabled]="isSubmitting"
                 >
                   <option value="">-- Sélectionner --</option>
+                  @if (vehicules.length === 0) {
+                    <option disabled>Aucun véhicule disponible</option>
+                  }
+                  @else {
                   <option *ngFor="let vehicule of vehicules" [value]="vehicule.id">
                     {{ vehicule.marque }} {{ vehicule.modele }} - {{ vehicule.immatriculation }}
+                  </option>
+                  }
+                </select>
+              </div>
+
+              <!-- Chauffeur -->
+              <div class="col-md-6">
+                <label class="form-label" for="chauffeur">Chauffeur</label>
+                <select
+                  id="chauffeur"
+                  name="chauffeurId"
+                  class="form-select"
+                  [(ngModel)]="trajetForm.chauffeurId"
+                  [disabled]="isSubmitting"
+                >
+                  <option [ngValue]="null">-- Sélectionner --</option>
+                  <option *ngFor="let ch of chauffeurs" [ngValue]="ch.id">
+                    {{ ch.fullName }}{{ ch.username }}
                   </option>
                 </select>
               </div>
@@ -225,6 +247,10 @@
             <div class="detail-row">
               <span class="detail-label">Départ</span>
               <span class="detail-value">{{ trajetForm.dateDepart || '—' }} {{ trajetForm.heureDepart || '' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Chauffeur</span>
+              <span class="detail-value">{{ getChauffeurNom(trajetForm.chauffeurId) || '—' }}</span>
             </div>
           </div>
         </div>

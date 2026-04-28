@@ -7,6 +7,8 @@ import { Trajet, StatutTrajet } from '../../../../partages/models/trajet';
 import { Ville } from '../../../../partages/models/ville';
 import { Vehicule } from '../../../../partages/models/vehicule';
 import { ChangeDetectorRef } from '@angular/core';
+import { User } from '../../../../partages/models/users';
+import { UserService } from '../../../../coeur/services/user-service';
 
 interface TrajetForm {
   villeDepartId: string;
@@ -18,6 +20,7 @@ interface TrajetForm {
   dateDepart: string;
   heureDepart: string;
   statut: string;
+  chauffeurId: number;
 }
 
 // interface FormErrors {
@@ -41,6 +44,7 @@ interface FormErrors {
   dateDepart?: string;
   heureDepart?: string;
   statut?: string;
+  chauffeurId?: string;
 }
 
 enum ModalMode {
@@ -62,6 +66,8 @@ export class ListeTrajetCompent implements OnInit {
   filteredTrajets: Trajet[] = [];
   villes: Ville[] = [];
   vehicules: Vehicule[] = [];
+  chauffeurs: User[] = [];      
+
   isLoading = true;
   errorMessage = '';
 
@@ -95,7 +101,9 @@ export class ListeTrajetCompent implements OnInit {
     private trajetService: TrajetService,
     private villeService: VilleService,
     private vehiculeService: VehiculeService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private userService: UserService
+
   ) {}
 
   ngOnInit(): void {
@@ -111,12 +119,19 @@ export class ListeTrajetCompent implements OnInit {
     forkJoin({
       trajets: this.trajetService.getAll(),
       villes: this.villeService.getAllVilles(),
-      vehicules: this.vehiculeService.getAll()
+      vehicules: this.vehiculeService.getDisponibles(),
+      chauffeurs: this.userService.getChauffeurs()   
     }).subscribe({
       next: (results) => {
         this.trajets = results.trajets || [];
         this.villes = results.villes || [];
         this.vehicules = results.vehicules || [];
+        this.chauffeurs = results.chauffeurs || [];  
+        
+        console.log('Trajets chargés:', this.trajets);
+        console.log('Villes chargées:', this.villes);
+        console.log('Véhicules chargés:', this.vehicules);
+        console.log('Chauffeurs chargés:', this.chauffeurs); 
 
         this.filterTrajets();
 
@@ -132,25 +147,6 @@ export class ListeTrajetCompent implements OnInit {
     });
   }
 
-  // ── Filtre ────────────────────────────────────────────────
-  // filterTrajets(): void {
-  //   const t = this.searchTerm.toLowerCase().trim();
-  //   if (!t) {
-  //     this.filteredTrajets = [...this.trajets];
-  //   } else {
-  //     this.filteredTrajets = this.trajets.filter(tr => {
-  //       const villeDep = this.villes.find(v => String(v.id) === String(tr.villeDepartId))?.nomVille || '';
-  //       const villeArr = this.villes.find(v => String(v.id) === String(tr.villeArriveeId))?.nomVille || '';
-  //       const vehicule = this.vehicules.find(v => String(v.id) === String(tr.vehiculeId))?.immatriculation || '';
-        
-  //       return villeDep.toLowerCase().includes(t) ||
-  //              villeArr.toLowerCase().includes(t) ||
-  //              vehicule.toLowerCase().includes(t) ||
-  //              tr.distance.toString().includes(t) ||
-  //              tr.tarif.toString().includes(t);
-  //     });
-  //   }
-  // }
 
   // ── Filtre ────────────────────────────────────────────────
   filterTrajets(): void {
@@ -204,6 +200,14 @@ export class ListeTrajetCompent implements OnInit {
 
   
   // ── Helpers pour l'affichage ──────────────────────────────
+
+  
+  getChauffeurNom(chauffeurId: number): string {
+    const c = this.chauffeurs.find(ch => ch.id === chauffeurId);
+    return c ? `${c.fullName || ''} ${c.username}` : 'Inconnu';
+  }
+
+
   getVilleNom(villeId: string): any {
     return this.villes.find(v => String(v.id) === String(villeId))?.nomVille || 'Inconnue';
   }
@@ -253,7 +257,9 @@ export class ListeTrajetCompent implements OnInit {
       tarif: trajet.tarif,
       dateDepart: trajet.dateDepart,
       heureDepart: trajet.heureDepart,
-      statut: statutString
+      statut: statutString,
+      // chauffeurId: trajet.chauffeur.id? trajet.chauffeur.id : 0
+      chauffeurId: trajet.chauffeurId || 0
     };
 
     this.formError = '';
@@ -281,7 +287,9 @@ export class ListeTrajetCompent implements OnInit {
       tarif: trajet.tarif,
       dateDepart: trajet.dateDepart,
       heureDepart: trajet.heureDepart,
-      statut: statutString
+      statut: statutString,
+      // chauffeurId: trajet.chauffeur.id? trajet.chauffeur.id : 0
+      chauffeurId: trajet.chauffeurId || 0
     };
 
     this.formError = '';
@@ -312,6 +320,8 @@ export class ListeTrajetCompent implements OnInit {
         // Essayer de lire le message du serveur
         const serverMsg = err.error?.message || err.error?.error || err.statusText;
         alert(`Erreur lors de la suppression : ${serverMsg || 'Veuillez réessayer.'}`);
+        this.cd.detectChanges(); 
+
       }
     });
 
@@ -399,6 +409,12 @@ export class ListeTrajetCompent implements OnInit {
       hasError = true;
     }
 
+     if (!this.trajetForm.chauffeurId) {
+      this.formErrors.chauffeurId = 'Le chauffeur est obligatoire.';
+      hasError = true;
+    }
+
+
     if (hasError) return;
 
     this.isSubmitting = true;
@@ -415,7 +431,8 @@ export class ListeTrajetCompent implements OnInit {
       tarif: Number(this.trajetForm.tarif),
       dateDepart: this.trajetForm.dateDepart,
       heureDepart: this.trajetForm.heureDepart,
-      statut: statutNumeric
+      statut: statutNumeric,
+      chauffeurId: this.trajetForm.chauffeurId? Number(this.trajetForm.chauffeurId) : undefined
     };
 
     if (this.modalMode === ModalMode.AJOUT) {
@@ -424,6 +441,8 @@ export class ListeTrajetCompent implements OnInit {
           this.isSubmitting = false;
           this.formSuccess = 'Trajet enregistré avec succès !';
           this.trajets.push(nouveau);
+          console.log('Trajet créé:', nouveau);
+          console.log('Liste trajets après ajout:', this.trajets);
           this.filteredTrajets = [...this.trajets];
           setTimeout(() => this.closeModal(), 1200);
         },
@@ -461,7 +480,8 @@ export class ListeTrajetCompent implements OnInit {
       tarif: null,
       dateDepart: '',
       heureDepart: '',
-      statut: 'PROGRAMME'
+      statut: 'PROGRAMME',
+      chauffeurId: 0   
     };
   }
 
