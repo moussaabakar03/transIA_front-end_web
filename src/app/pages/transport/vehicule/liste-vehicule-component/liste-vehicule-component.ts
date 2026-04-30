@@ -2,12 +2,13 @@
 import { Component, OnInit, HostListener, ChangeDetectorRef } from '@angular/core';
 import { VehiculeService } from '../../../../coeur/services/vehicule-service';
 import { StatutVehicule, Vehicule, VehiculePayload } from '../../../../partages/models/vehicule';
+import { error } from 'console';
 
 interface VehiculeForm {
   marque:         string;
   modele:         string;
   immatriculation:string;
-  capacite:       number | null;
+  capacite:       number;
   statut:         string;
   image:          string;
 }
@@ -64,10 +65,12 @@ export class ListeVehiculeComponent implements OnInit {
 //       default: return '—';
 //     }
 // }
+
   statusOptions = [
-    { value: 'ACTIF',       label: 'Actif',       numeric: 1 },
-    { value: 'MAINTENANCE', label: 'En maintenance', numeric: 2 },
-    { value: 'INACTIF',     label: 'Inactif',     numeric: 3 },
+    { value: 'Disponible',       label: 'Disponible',       numeric: 1 },
+    { value: 'En_Service', label: 'En service', numeric: 2 },
+    { value: 'En_maintenance',     label: 'En maintenance',     numeric: 3 },
+    { value: 'Indisponible',     label: 'Indisponible',     numeric: 4 },
   ];
 
   constructor(private vehiculeService: VehiculeService, private cd: ChangeDetectorRef) {}
@@ -100,23 +103,6 @@ export class ListeVehiculeComponent implements OnInit {
       }
     });
   }
-
-  //   loadVehicules(): void {
-  //   this.isLoading   = true;
-  //   this.errorMessage = '';
-
-  //   this.vehiculeService.getAll().subscribe({
-  //     next: (data) => {
-  //       this.vehicules         = data;
-  //       this.filteredVehicules = data;
-  //       this.isLoading         = false;
-  //     },
-  //     error: () => {
-  //       this.errorMessage = 'Impossible de charger les véhicules.';
-  //       this.isLoading    = false;
-  //     }
-  //   });
-  // }
 
   // ── Filtre ────────────────────────────────────────────────
   filterVehicules(): void {
@@ -167,17 +153,41 @@ export class ListeVehiculeComponent implements OnInit {
     this.modalMode = ModalMode.MODIFICATION;
     
     // Convertir le statut numérique en chaîne pour le formulaire
-    const statutString = this.statusOptions.find(opt => opt.numeric === vehicule.statut)?.value || 'ACTIF';
+    // const statutString = this.statusOptions.find(opt => opt.numeric === vehicule.statut)?.value || 'ACTIF';
     
     this.vehiculeForm = {
       marque: vehicule.marque,
       modele: vehicule.modele,
       immatriculation: vehicule.immatriculation,
       capacite: vehicule.capacite,
-      statut: statutString,
+      statut: vehicule.statut.toString(), // Utiliser la valeur numérique directement
       image: vehicule.image || ''
     };
     
+    this.vehiculeService.update(id,{
+      marque: this.vehiculeForm.marque.trim(),
+      modele: this.vehiculeForm.modele.trim(),
+      immatriculation: this.vehiculeForm.immatriculation.trim().toUpperCase(),
+      capacite: Number(this.vehiculeForm.capacite),
+      statut: Number(this.vehiculeForm.statut), // Envoyer la valeur numérique
+      image: this.vehiculeForm.image?.trim() || null
+    }).subscribe({
+      next: (modifie) => {
+        this.formSuccess = 'Véhicule modifié avec succès !';
+        // Mettre à jour la liste locale
+        const index = this.vehicules.findIndex(v => v.id === id);
+        if (index !== -1) {
+          this.vehicules[index] = modifie;
+          this.filterVehicules();
+        }
+        setTimeout(() => this.closeModal(), 1200);
+      },
+      error: (err) => {
+        console.error('Erreur modification véhicule:', err);
+        this.formError = "Erreur lors de la modification. Veuillez réessayer.";
+      }
+    });
+  
     this.formError = '';
     this.formSuccess = '';
     this.formErrors = {};
@@ -277,15 +287,19 @@ export class ListeVehiculeComponent implements OnInit {
     this.isSubmitting = true;
 
     // Conversion du statut string vers nombre
-    const statutOption = this.statusOptions.find(opt => opt.value === this.vehiculeForm.statut);
-    const statutNumeric = statutOption ? statutOption.numeric : 1;
+    // const statutOption = this.statusOptions.find(opt => opt.value === this.vehiculeForm.statut);
+    // const statutNumeric = statutOption ? statutOption.numeric : 1;
 
     const payload: VehiculePayload = {
       marque: this.vehiculeForm.marque.trim(),
       modele: this.vehiculeForm.modele.trim(),
       immatriculation: this.vehiculeForm.immatriculation.trim().toUpperCase(),
       capacite: Number(this.vehiculeForm.capacite),
-      statut: statutNumeric,
+      statut: this.vehiculeForm.statut === 'Disponible' ? StatutVehicule.Disponible :
+             this.vehiculeForm.statut === 'En_Service' ? StatutVehicule.En_Service :
+             this.vehiculeForm.statut === 'En_maintenance' ? StatutVehicule.En_maintenance :
+             this.vehiculeForm.statut === 'Indisponible' ? StatutVehicule.Indisponible :
+             StatutVehicule.Disponible, // valeur par défaut
       image: this.vehiculeForm.image?.trim() || null
     };
 
@@ -351,7 +365,7 @@ export class ListeVehiculeComponent implements OnInit {
 
   // ── Helpers ───────────────────────────────────────────────
   private emptyForm(): VehiculeForm {
-    return { marque: '', modele: '', immatriculation: '', capacite: null, statut: 'ACTIF', image: '' };
+    return { marque: '', modele: '', immatriculation: '', capacite: 0, statut: 'ACTIF', image: '' };
   }
 
   // Nettoyer les erreurs d'un champ quand il est modifié

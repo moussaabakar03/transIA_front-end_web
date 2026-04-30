@@ -30,112 +30,137 @@
           <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)" aria-expanded="false">
             <div class="d-flex align-items-center gap-3">
               <span class="d-flex">
-                <i class="ti ti-layout-grid"></i>
+                <i class="ti ti-car"></i>
               </span>
-              <span class="hide-menu">Transport</span>
+              <span class="hide-menu">Véhicule</span>
             </div>
           </a>
           <ul aria-expanded="false" class="collapse first-level">
             <!-- Véhicule -->
             <li class="sidebar-item">
-              <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)" aria-expanded="false">
+              <a class="sidebar-link justify-content-between" routerLink="/vehicules/liste">
                 <div class="d-flex align-items-center gap-3">
-                  <span class="d-flex">
-                    <i class="ti ti-car"></i>
-                  </span>
-                  <span class="hide-menu">Véhicule</span>
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Liste</span>
                 </div>
               </a>
-              <ul aria-expanded="false" class="collapse first-level">
-                <li class="sidebar-item">
-                  <a class="sidebar-link justify-content-between" routerLink="/vehicules/liste">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="round-16 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-circle"></i>
-                      </div>
-                      <span class="hide-menu">Liste</span>
-                    </div>
-                  </a>
-                </li>
-                <li class="sidebar-item">
-                  <a class="sidebar-link justify-content-between" routerLink="/vehicules/ajout">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="round-16 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-circle"></i>
-                      </div>
-                      <span class="hide-menu">Ajout</span>
-                    </div>
-                  </a>
-                </li>
-              </ul>
             </li>
-
-            <!-- Ville (ajouté) -->
             <li class="sidebar-item">
-              <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)" aria-expanded="false">
+              <a class="sidebar-link justify-content-between" routerLink="/vehicules/ajout">
                 <div class="d-flex align-items-center gap-3">
-                  <span class="d-flex">
-                    <i class="ti ti-building"></i>
-                  </span>
-                  <span class="hide-menu">Ville</span>
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Ajout</span>
                 </div>
               </a>
-              <ul aria-expanded="false" class="collapse first-level">
-                <li class="sidebar-item">
-                  <a class="sidebar-link justify-content-between" routerLink="/villes/liste">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="round-16 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-circle"></i>
-                      </div>
-                      <span class="hide-menu">Liste</span>
-                    </div>
-                  </a>
-                </li>
-                <li class="sidebar-item">
-                  <a class="sidebar-link justify-content-between" routerLink="/villes/ajout">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="round-16 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-circle"></i>
-                      </div>
-                      <span class="hide-menu">Ajout</span>
-                    </div>
-                  </a>
-                </li>
-              </ul>
             </li>
+           
+          </ul>
+        </li>
 
-            <!-- Trajet (ajouté) -->
+        <li class="sidebar-item">
+          <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)" aria-expanded="false">
+            <div class="d-flex align-items-center gap-3">
+              <span class="d-flex">
+                <i class="ti ti-route"></i>
+              </span>
+              <span class="hide-menu">Trajet</span>
+            </div>
+          </a>
+          <ul aria-expanded="false" class="collapse first-level">
+            <!-- Trajet -->
             <li class="sidebar-item">
-              <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)" aria-expanded="false">
+              <a class="sidebar-link justify-content-between" routerLink="/trajets/liste">
                 <div class="d-flex align-items-center gap-3">
-                  <span class="d-flex">
-                    <i class="ti ti-route"></i>
-                  </span>
-                  <span class="hide-menu">Trajet</span>
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Liste</span>
                 </div>
               </a>
-              <ul aria-expanded="false" class="collapse first-level">
-                <li class="sidebar-item">
-                  <a class="sidebar-link justify-content-between" routerLink="/trajets/liste">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="round-16 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-circle"></i>
-                      </div>
-                      <span class="hide-menu">Liste</span>
-                    </div>
-                  </a>
-                </li>
-                <li class="sidebar-item">
-                  <a class="sidebar-link justify-content-between" routerLink="/trajets/ajout">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="round-16 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-circle"></i>
-                      </div>
-                      <span class="hide-menu">Ajout</span>
-                    </div>
-                  </a>
-                </li>
-              </ul>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link justify-content-between" routerLink="/trajets/ajout">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Ajout</span>
+                </div>
+              </a>
+            </li>
+           
+          </ul>
+        </li>
+
+        <li class="sidebar-item">
+          <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)" aria-expanded="false">
+            <div class="d-flex align-items-center gap-3">
+              <span class="d-flex">
+                <i class="ti ti-building"></i>
+              </span>
+              <span class="hide-menu">Ville</span>
+            </div>
+          </a>
+          <ul aria-expanded="false" class="collapse first-level">
+            <!-- Ville -->
+            <li class="sidebar-item">
+              <a class="sidebar-link justify-content-between" routerLink="/villes/liste">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Liste</span>
+                </div>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link justify-content-between" routerLink="/villes/ajout">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Ajout</span>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- reservations -->
+         <li class="sidebar-item">
+          <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)" aria-expanded="false">
+            <div class="d-flex align-items-center gap-3">
+              <span class="d-flex">
+                <i class="ti ti-calendar"></i>
+              </span>
+              <span class="hide-menu">Réservation</span>
+            </div>
+          </a>
+          <ul aria-expanded="false" class="collapse first-level">
+            <!-- Réservation -->
+            <li class="sidebar-item">
+              <a class="sidebar-link justify-content-between" routerLink="/reservations/liste">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Liste</span>
+                </div>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link justify-content-between" routerLink="/reservations/ajout">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Ajout</span>
+                </div>
+              </a>
             </li>
           </ul>
         </li>

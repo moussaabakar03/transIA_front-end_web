@@ -2,8 +2,9 @@ export interface User {
     id?: number;
     fullName: string;
     username: string;
-    password: string;
-    roles: string; 
-    enable: boolean;
     publicId: string; 
+    nom: string;   
+    password: string;
+    enable: boolean;
+    roles: string; 
 }

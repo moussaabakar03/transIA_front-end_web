@@ -7,6 +7,8 @@ import { AuthService } from '../services/auth-service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
+  private isRedirecting = false;
+
   constructor(private authService: AuthService, private router: Router) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -25,9 +27,13 @@ export class AuthInterceptor implements HttpInterceptor {
       catchError((error: HttpErrorResponse) => {
         const isLoginRequest = req.url.includes('/login');
 
-        if (error.status === 401 && !isLoginRequest) {
+        if (error.status === 401 && !isLoginRequest && !this.isRedirecting) {
+          // Seulement rediriger une seule fois pour éviter les redirections en cascade
+          this.isRedirecting = true;
           this.authService.clearSession();
-          this.router.navigate(['/login']);
+          this.router.navigate(['/login']).then(() => {
+            this.isRedirecting = false;
+          });
         }
 
         return throwError(() => error);

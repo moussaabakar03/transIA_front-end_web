@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Trajet } from '../../partages/models/trajet';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
+// import { TrajetForm } from '../../pages/transport/trajet/liste-trajet-compent/liste-trajet-compent';
 
 @Injectable({
   providedIn: 'root',
@@ -23,7 +24,7 @@ export class TrajetService {
     return this.http.post<Trajet>(`${environment.backendurl}/trajet`, payload);
   }
 
-  update(id: string, payload: Trajet): Observable<Trajet> {
+  update(id: string, payload: any): Observable<Trajet> {
     return this.http.put<Trajet>(`${environment.backendurl}/trajet/${id}`, payload);
   }
 

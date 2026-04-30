@@ -49,7 +49,16 @@ const routes: Routes = [
           import('./pages/transport/trajet/trajet-module').then(m => m.TrajetModule),
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard]
+      },
+
+      {
+        path: 'reservations',
+        loadChildren: () =>
+          import('./pages/reservation/reservation.module').then(m => m.ReservationModule),
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard]
       }
+      
     ]
   },
 

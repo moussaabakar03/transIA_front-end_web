@@ -1,0 +1,147 @@
+<div class="reservation-list-container">
+  <!-- En-tête -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="mb-1 fw-bold">Gestion des réservations</h4>
+      <p class="text-muted mb-0">Consultez et gérez toutes les réservations</p>
+    </div>
+    <div>
+      <button class="btn btn-primary" (click)="openModal()">
+        <i class="las la-plus me-1"></i> Nouvelle réservation
+      </button>
+    </div>
+  </div>
+
+  <!-- Barre de recherche -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <input type="text" class="form-control" placeholder="Rechercher par ville, passager..."
+                 [(ngModel)]="searchTerm" (input)="applyFilter()" />
+        </div>
+        <div class="col-md-6 text-end">
+          <span class="text-muted">{{ filteredReservations.length }} réservation(s)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chargement / Erreur -->
+  <div *ngIf="isLoading" class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+  <!-- Tableau -->
+  <div *ngIf="!isLoading && !errorMessage" class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>#</th><th>Trajet</th><th>Date</th><th>Places</th>
+              <th>Responsable</th><th>Statut</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="filteredReservations.length === 0">
+              <td colspan="7" class="text-center py-5">Aucune réservation trouvée</td>
+            </tr>
+            <tr *ngFor="let res of filteredReservations; let i = index">
+              <td>#{{ i+1 }}</td>
+              <td>{{ getTrajetDescription(res.trajetId) }}</td>
+              <td>{{ res.dateReservation | date:'short' }}</td>
+              <td>{{ res.nombrePlace }}</td>
+              <td>{{ getNomResponsable(res.billets) }}</td>
+              <td>
+                <span class="badge" [class.bg-warning]="res.statut === 'EN_ATTENTE'"
+                      [class.bg-success]="res.statut === 'CONFIRMEE'"
+                      [class.bg-danger]="res.statut === 'ANNULEE'"
+                      [class.bg-secondary]="res.statut === 'EXPIREE'">
+                  {{ getStatutLabel(res.statut) }}
+                </span>
+              </td>
+              <td>
+                <div class="hstack gap-2">
+                  <button class="btn btn-soft-primary btn-sm" (click)="onView(res.id!)"><i class="las la-eye"></i></button>
+                  <button class="btn btn-soft-info btn-sm"
+                          (click)="onEdit(res.id!)"
+                          [disabled]="res.statut !== 'EN_ATTENTE'"><i class="las la-pen"></i></button>
+                  <button class="btn btn-soft-danger btn-sm"
+                          (click)="onAnnuler(res.id!)"
+                          [disabled]="res.statut !== 'EN_ATTENTE' && res.statut !== 'CONFIRMEE'"><i class="las la-ban"></i></button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" [class.show]="isModalOpen" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <!-- Entête -->
+    <div class="modal-box-header">
+      <h5>{{ modalMode === 'ajout' ? 'Nouvelle réservation' : modalMode === 'visualisation' ? 'Détails' : 'Modifier' }}</h5>
+      <button class="modal-close-btn" (click)="closeModal()"><i class="las la-times"></i></button>
+    </div>
+    <div class="modal-box-body">
+      <div *ngIf="formError" class="alert alert-danger">{{ formError }}</div>
+      <div *ngIf="formSuccess" class="alert alert-success">{{ formSuccess }}</div>
+
+      <!-- Visualisation -->
+      <div *ngIf="modalMode === 'visualisation'">
+        <p><strong>Trajet :</strong> {{ getTrajetDescription(form.trajetId) }}</p>
+        <p><strong>Places :</strong> {{ form.nombrePlace }}</p>
+        <p><strong>Responsable :</strong> {{ form.nomResponsable }}</p>
+        <!-- <p><strong>Responsable :</strong> {{ getNomResponsable(form.billets) }}</p> -->
+        <p><strong>Passagers supplémentaires :</strong> {{ form.passagersText || '—' }}</p>
+      </div>
+
+      <!-- Formulaire -->
+      <div *ngIf="modalMode !== 'visualisation'" class="row g-3">
+        <div class="col-md-12">
+          <label>Trajet</label>
+          <select class="form-select" [(ngModel)]="form.trajetId" (ngModelChange)="onFieldChange('trajetId')">
+            <option value="">-- Choisir --</option>
+            <option *ngFor="let t of trajets" [value]="t.id">
+              {{ t.villeDepart.nomVille }} → {{ t.villeArrivee.nomVille }} ({{ t.dateDepart }})
+            </option>
+          </select>
+          <div *ngIf="formErrors.trajetId" class="field-error">{{ formErrors.trajetId }}</div>
+        </div>
+        <div class="col-md-6">
+          <label>Nombre de places</label>
+          <input type="number" min="1" class="form-control" [(ngModel)]="form.nombrePlace" (ngModelChange)="onFieldChange('nombrePlace')" />
+          <div *ngIf="formErrors.nombrePlace" class="field-error">{{ formErrors.nombrePlace }}</div>
+        </div>
+        <div class="col-md-6">
+          <label>Nom responsable</label>
+          <input type="text" class="form-control" [(ngModel)]="form.nomResponsable" (ngModelChange)="onFieldChange('nomResponsable')" />
+          <div *ngIf="formErrors.nomResponsable" class="field-error">{{ formErrors.nomResponsable }}</div>
+        </div>
+        <div class="col-md-12">
+          <label>Noms des autres passagers (séparés par des virgules)</label>
+          <textarea class="form-control" [(ngModel)]="form.passagersText" placeholder="ex: Jean Dupont, Marie Curie"></textarea>
+          <small>Le nombre de passagers + responsable doit correspondre au nombre de places.</small>
+        </div>
+        <!-- Optionnel user -->
+        <div class="col-md-12">
+          <label>Utilisateur (optionnel)</label>
+          <select class="form-select" [(ngModel)]="form.userId">
+            <option [ngValue]="null">Aucun</option>
+            <option *ngFor="let u of users" [ngValue]="u.id">{{ u.fullName || u.username }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-box-footer" *ngIf="modalMode !== 'visualisation'">
+      <button class="btn btn-light" (click)="closeModal()">Annuler</button>
+      <button class="btn btn-primary" (click)="submitForm()" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Enregistrement...' : 'Enregistrer' }}
+      </button>
+    </div>
+  </div>
+</div>

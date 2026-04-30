@@ -10,8 +10,19 @@ import { HttpClient } from '@angular/common/http';
 export class UserService {
   constructor(private http: HttpClient) {}
 
+  //  private baseUrl = `${environment.backendurl}/utilisateur`;
+
+
+  // getChauffeurs(): Observable<User[]> {
+  //   return this.http.get<User[]>(`${this.baseUrl}/chauffeurs`);
+  // }
+
   // Endpoint qui renvoie tous les utilisateurs ayant le rôle de chauffeur
   getChauffeurs(): Observable<User[]> {
+    return this.http.get<User[]>(`${environment.backendurl}/utilisateur/chauffeurs`);
+  }
+
+  getAllUsers(): Observable<User[]> {
     return this.http.get<User[]>(`${environment.backendurl}/users`);
   }
 }

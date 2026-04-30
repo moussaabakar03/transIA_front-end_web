@@ -19,186 +19,109 @@
     <div class="col-lg-8">
       <div class="card form-card">
         <div class="card-body">
-          <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
-            {{ errorMessage }}
-          </div>
-
-          <div *ngIf="successMessage" class="alert alert-success" role="alert">
-            {{ successMessage }}
-          </div>
+          <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+          <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
 
           <form novalidate>
             <div class="row g-3">
-
               <!-- Ville de départ -->
               <div class="col-md-6">
-                <label class="form-label" for="villeDep">Ville de départ</label>
-                <select
-                  id="villeDep"
-                  name="villeDepartId"
-                  class="form-select"
-                  [(ngModel)]="trajetForm.villeDepartId"
-                  [disabled]="isSubmitting"
-                >
+                <label class="form-label">Ville de départ</label>
+                <select class="form-select" [(ngModel)]="trajetForm.villeDepartId" name="villeDepartId"
+                  [disabled]="isSubmitting" (ngModelChange)="onFieldChange('villeDepartId')">
                   <option value="">-- Sélectionner --</option>
-                  <option *ngFor="let ville of villes" [value]="ville.id">
-                    {{ ville.nomVille }}
-                  </option>
+                  <option *ngFor="let ville of villes" [value]="ville.id">{{ ville.nomVille }}</option>
                 </select>
+                <div *ngIf="formErrors.villeDepartId" class="field-error">{{ formErrors.villeDepartId }}</div>
               </div>
 
               <!-- Ville d'arrivée -->
               <div class="col-md-6">
-                <label class="form-label" for="villeArr">Ville d'arrivée</label>
-                <select
-                  id="villeArr"
-                  name="villeArriveeId"
-                  class="form-select"
-                  [(ngModel)]="trajetForm.villeArriveeId"
-                  [disabled]="isSubmitting"
-                >
+                <label class="form-label">Ville d'arrivée</label>
+                <select class="form-select" [(ngModel)]="trajetForm.villeArriveeId" name="villeArriveeId"
+                  [disabled]="isSubmitting" (ngModelChange)="onFieldChange('villeArriveeId')">
                   <option value="">-- Sélectionner --</option>
-                  <option *ngFor="let ville of villes" [value]="ville.id">
-                    {{ ville.nomVille }}
-                  </option>
+                  <option *ngFor="let ville of villes" [value]="ville.id">{{ ville.nomVille }}</option>
                 </select>
+                <div *ngIf="formErrors.villeArriveeId" class="field-error">{{ formErrors.villeArriveeId }}</div>
               </div>
 
               <!-- Véhicule -->
               <div class="col-md-6">
-                <label class="form-label" for="vehicule">Véhicule</label>
-                <select
-                  id="vehicule"
-                  name="vehiculeId"
-                  class="form-select"
-                  [(ngModel)]="trajetForm.vehiculeId"
-                  [disabled]="isSubmitting"
-                >
+                <label class="form-label">Véhicule</label>
+                <select class="form-select" [(ngModel)]="trajetForm.vehiculeId" name="vehiculeId"
+                  [disabled]="isSubmitting" (ngModelChange)="onFieldChange('vehiculeId')">
                   <option value="">-- Sélectionner --</option>
-                  @if (vehicules.length === 0) {
-                    <option disabled>Aucun véhicule disponible</option>
-                  }
-                  @else {
-                  <option *ngFor="let vehicule of vehicules" [value]="vehicule.id">
-                    {{ vehicule.marque }} {{ vehicule.modele }} - {{ vehicule.immatriculation }}
-                  </option>
-                  }
+                  <option *ngFor="let v of vehicules" [value]="v.id">{{ v.marque }} {{ v.modele }} - {{ v.immatriculation }}</option>
                 </select>
+                <div *ngIf="formErrors.vehiculeId" class="field-error">{{ formErrors.vehiculeId }}</div>
               </div>
 
-              <!-- Chauffeur -->
+              <!-- Chauffeur (nouveau) -->
               <div class="col-md-6">
-                <label class="form-label" for="chauffeur">Chauffeur</label>
-                <select
-                  id="chauffeur"
-                  name="chauffeurId"
-                  class="form-select"
-                  [(ngModel)]="trajetForm.chauffeurId"
-                  [disabled]="isSubmitting"
-                >
-                  <option [ngValue]="null">-- Sélectionner --</option>
-                  <option *ngFor="let ch of chauffeurs" [ngValue]="ch.id">
-                    {{ ch.fullName }}{{ ch.username }}
-                  </option>
+                <label class="form-label">Chauffeur</label>
+                <select class="form-select" [(ngModel)]="trajetForm.chauffeurId" name="chauffeurId"
+                  [disabled]="isSubmitting" (ngModelChange)="onFieldChange('chauffeurId')">
+                  <option [ngValue]="0">-- Sélectionner --</option>
+                  <option *ngFor="let ch of chauffeurs" [ngValue]="ch.id">{{ ch.fullName || ch.username }}</option>
                 </select>
+                <div *ngIf="formErrors.chauffeurId" class="field-error">{{ formErrors.chauffeurId }}</div>
               </div>
 
               <!-- Distance -->
               <div class="col-md-6">
-                <label class="form-label" for="distance">Distance (km)</label>
-                <input
-                  id="distance"
-                  name="distance"
-                  type="number"
-                  min="1"
-                  step="0.1"
-                  class="form-control"
-                  [(ngModel)]="trajetForm.distance"
-                  [disabled]="isSubmitting"
-                  placeholder="Ex: 150"
-                />
+                <label class="form-label">Distance (km)</label>
+                <input type="number" min="1" step="0.1" class="form-control" [(ngModel)]="trajetForm.distance"
+                  name="distance" [disabled]="isSubmitting" (ngModelChange)="onFieldChange('distance')" placeholder="Ex: 150" />
+                <div *ngIf="formErrors.distance" class="field-error">{{ formErrors.distance }}</div>
               </div>
 
               <!-- Durée estimée -->
               <div class="col-md-6">
-                <label class="form-label" for="duree">Durée estimée</label>
-                <input
-                  id="duree"
-                  name="dureeEstimee"
-                  type="text"
-                  class="form-control"
-                  [(ngModel)]="trajetForm.dureeEstimee"
-                  [disabled]="isSubmitting"
-                  placeholder="Ex: 2h 30m"
-                />
+                <label class="form-label">Durée estimée</label>
+                <input type="text" class="form-control" [(ngModel)]="trajetForm.dureeEstimee" name="dureeEstimee"
+                  [disabled]="isSubmitting" (ngModelChange)="onFieldChange('dureeEstimee')" placeholder="Ex: 2h 30m" />
+                <div *ngIf="formErrors.dureeEstimee" class="field-error">{{ formErrors.dureeEstimee }}</div>
               </div>
 
               <!-- Tarif -->
               <div class="col-md-6">
-                <label class="form-label" for="tarif">Tarif (FCFA)</label>
-                <input
-                  id="tarif"
-                  name="tarif"
-                  type="number"
-                  min="1"
-                  step="100"
-                  class="form-control"
-                  [(ngModel)]="trajetForm.tarif"
-                  [disabled]="isSubmitting"
-                  placeholder="Ex: 5000"
-                />
+                <label class="form-label">Tarif (FCFA)</label>
+                <input type="number" min="1" step="100" class="form-control" [(ngModel)]="trajetForm.tarif"
+                  name="tarif" [disabled]="isSubmitting" (ngModelChange)="onFieldChange('tarif')" placeholder="Ex: 5000" />
+                <div *ngIf="formErrors.tarif" class="field-error">{{ formErrors.tarif }}</div>
               </div>
 
               <!-- Date de départ -->
               <div class="col-md-6">
-                <label class="form-label" for="dateDepart">Date de départ</label>
-                <input
-                  id="dateDepart"
-                  name="dateDepart"
-                  type="date"
-                  class="form-control"
-                  [(ngModel)]="trajetForm.dateDepart"
-                  [disabled]="isSubmitting"
-                />
+                <label class="form-label">Date de départ</label>
+                <input type="date" class="form-control" [(ngModel)]="trajetForm.dateDepart" name="dateDepart"
+                  [disabled]="isSubmitting" (ngModelChange)="onFieldChange('dateDepart')" />
+                <div *ngIf="formErrors.dateDepart" class="field-error">{{ formErrors.dateDepart }}</div>
               </div>
 
               <!-- Heure de départ -->
               <div class="col-md-6">
-                <label class="form-label" for="heureDepart">Heure de départ</label>
-                <input
-                  id="heureDepart"
-                  name="heureDepart"
-                  type="time"
-                  class="form-control"
-                  [(ngModel)]="trajetForm.heureDepart"
-                  [disabled]="isSubmitting"
-                />
+                <label class="form-label">Heure de départ</label>
+                <input type="time" class="form-control" [(ngModel)]="trajetForm.heureDepart" name="heureDepart"
+                  [disabled]="isSubmitting" (ngModelChange)="onFieldChange('heureDepart')" />
+                <div *ngIf="formErrors.heureDepart" class="field-error">{{ formErrors.heureDepart }}</div>
               </div>
 
               <!-- Statut -->
               <div class="col-md-6">
-                <label class="form-label" for="statut">Statut</label>
-                <select
-                  id="statut"
-                  name="statut"
-                  class="form-select"
-                  [(ngModel)]="trajetForm.statut"
-                  [disabled]="isSubmitting"
-                >
-                  <option *ngFor="let option of statusOptions" [ngValue]="option.value">
-                    {{ option.label }}
-                  </option>
+                <label class="form-label">Statut</label>
+                <select class="form-select" [(ngModel)]="trajetForm.statut" name="statut" [disabled]="isSubmitting">
+                  <option *ngFor="let opt of statusOptions" [ngValue]="opt.value">{{ opt.label }}</option>
                 </select>
+                <div *ngIf="formErrors.statut" class="field-error">{{ formErrors.statut }}</div>
               </div>
-
             </div>
 
             <div class="form-actions mt-4">
-              <button type="button" class="btn btn-light" (click)="cancel()" [disabled]="isSubmitting">
-                Annuler
-              </button>
+              <button type="button" class="btn btn-light" (click)="cancel()" [disabled]="isSubmitting">Annuler</button>
               <button type="button" class="btn btn-primary" (click)="submit()" [disabled]="isSubmitting">
-                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
                 {{ isSubmitting ? 'Enregistrement...' : 'Enregistrer le trajet' }}
               </button>
             </div>
@@ -207,6 +130,7 @@
       </div>
     </div>
 
+    <!-- Résumé du trajet -->
     <div class="col-lg-4">
       <div class="card helper-card">
         <div class="card-body">
@@ -214,24 +138,20 @@
           <div class="summary-box">
             <div class="summary-item">
               <span class="summary-label">De</span>
-              <span class="summary-value">
-                {{ getVilleNom(trajetForm.villeDepartId) || '—' }}
-              </span>
+              <span class="summary-value">{{ getVilleNom(trajetForm.villeDepartId) || '—' }}</span>
             </div>
-            <div class="summary-arrow">
-              <i class="las la-arrow-right"></i>
-            </div>
+            <div class="summary-arrow"><i class="las la-arrow-right"></i></div>
             <div class="summary-item">
               <span class="summary-label">À</span>
-              <span class="summary-value">
-                {{ getVilleNom(trajetForm.villeArriveeId) || '—' }}
-              </span>
+              <span class="summary-value">{{ getVilleNom(trajetForm.villeArriveeId) || '—' }}</span>
             </div>
           </div>
-
           <hr />
-
           <div class="summary-details">
+            <div class="detail-row">
+              <span class="detail-label">Chauffeur</span>
+              <span class="detail-value">{{ trajetForm.chauffeurId ? getChauffeurNom(trajetForm.chauffeurId) : '—' }}</span>
+            </div>
             <div class="detail-row">
               <span class="detail-label">Distance</span>
               <span class="detail-value">{{ trajetForm.distance || 0 }} km</span>
@@ -247,10 +167,6 @@
             <div class="detail-row">
               <span class="detail-label">Départ</span>
               <span class="detail-value">{{ trajetForm.dateDepart || '—' }} {{ trajetForm.heureDepart || '' }}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Chauffeur</span>
-              <span class="detail-value">{{ getChauffeurNom(trajetForm.chauffeurId) || '—' }}</span>
             </div>
           </div>
         </div>

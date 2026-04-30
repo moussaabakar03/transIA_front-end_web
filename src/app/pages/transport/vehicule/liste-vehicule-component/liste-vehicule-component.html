@@ -220,9 +220,9 @@
                 <div class="detail-label"><i class="las la-toggle-on me-2"></i>Statut</div>
                 <div class="detail-value">
                   <span class="badge rounded-pill"
-                    [class.bg-success]="vehiculeForm.statut === 'ACTIF'"
-                    [class.bg-warning]="vehiculeForm.statut === 'MAINTENANCE'"
-                    [class.bg-secondary]="vehiculeForm.statut === 'INACTIF'">
+                    [class.bg-success]="vehiculeForm.statut === 'Disponible'"
+                    [class.bg-warning]="vehiculeForm.statut === 'En_Service'"
+                    [class.bg-secondary]="vehiculeForm.statut === 'En_maintenance' || vehiculeForm.statut === 'Indisponible'">
                     {{ vehiculeForm.statut || '—' }}
                   </span>
                 </div>
@@ -313,10 +313,10 @@
                     <!-- <option *ngFor="let opt of statusOptions" [ngValue]="opt.value">
                       {{ opt.label }}
                     </option> -->
-                    <option value="1">Actif</option>
-                    <option value="2">En maintenance</option>
-                    <option value="3">Inactif</option>
-                    <option value="4">Indisponible</option>
+                    <option value="Disponible">Disponible</option>
+                    <option value="En_Service">En service</option>
+                    <option value="En_maintenance">En maintenance</option>
+                    <option value="Indisponible">Indisponible</option>
 
                   </select>
                 </div>
@@ -363,9 +363,10 @@
                 <div class="preview-row">
                   <span class="preview-label-small">Statut</span>
                   <span class="preview-status-badge"
-                    [class.s-actif]="vehiculeForm.statut === '1'"
-                    [class.s-maintenance]="vehiculeForm.statut === '2'"
-                    [class.s-inactif]="vehiculeForm.statut === '3'">
+                    [class.s-Disponible]="vehiculeForm.statut === 'Disponible'"
+                    [class.s-En_Service]="vehiculeForm.statut === 'En_Service'"
+                    [class.s-En_maintenance]="vehiculeForm.statut === 'En_maintenance'"
+                    [class.s-Indisponible]="vehiculeForm.statut === 'Indisponible'">
                     {{ vehiculeForm.statut || '—' }}
                   </span>
                 </div>

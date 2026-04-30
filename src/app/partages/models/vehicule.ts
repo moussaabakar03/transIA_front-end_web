@@ -22,6 +22,7 @@ export interface Vehicule {
   image: string;
 }
 
+
 export interface VehiculePayload {
   marque: string;
   modele: string;
