@@ -8,6 +8,8 @@ import { Trajet, StatutTrajet } from '../../../../partages/models/trajet';
 import { Ville } from '../../../../partages/models/ville';
 import { Vehicule } from '../../../../partages/models/vehicule';
 import { User } from '../../../../partages/models/users';
+import { Reservation } from '../../../../partages/models/reservation.model';
+import { ReservationService } from '../../../../coeur/services/reservation-service';
 
 interface TrajetForm {
   villeDepartId: string;
@@ -55,6 +57,9 @@ export class ListeTrajetCompent implements OnInit {
   vehicules: Vehicule[] = [];
   chauffeurs: User[] = [];
 
+  reservationsTrajet: Reservation[] = [];
+  loadingReservations = false;
+
   isLoading = true;
   errorMessage = '';
 
@@ -85,7 +90,8 @@ export class ListeTrajetCompent implements OnInit {
     private villeService: VilleService,
     private vehiculeService: VehiculeService,
     private userService: UserService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private reservationService: ReservationService
   ) {}
 
   ngOnInit(): void {
@@ -185,6 +191,23 @@ export class ListeTrajetCompent implements OnInit {
     this.editingTrajetId = id;
     this.modalMode = ModalMode.VISUALISATION;
     this.trajetForm = this.trajetToForm(t);
+
+    // Charger les réservations du trajet
+    this.loadingReservations = true;
+    this.reservationService.getByTrajet(id).subscribe({
+      next: reservations => {
+        this.reservationsTrajet = reservations;
+        this.loadingReservations = false;
+        this.cd.detectChanges();
+      },
+      error: err => {
+        console.error('Erreur chargement réservations:', err);
+        this.reservationsTrajet = [];
+        this.loadingReservations = false;
+        this.cd.detectChanges();
+      }
+    });
+
     this.openModalCommon();
   }
 

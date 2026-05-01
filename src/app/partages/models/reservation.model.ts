@@ -1,8 +1,16 @@
+import { Paiement } from "./paiement";
+import { User } from "./users";
+
 export enum StatutReservation {
   EN_ATTENTE = 'EN_ATTENTE',
   CONFIRMEE = 'CONFIRMEE',
   ANNULEE = 'ANNULEE',
   EXPIREE = 'EXPIREE'
+}
+
+export enum TypeReservation{
+  EN_LIGNE, 
+  PRESENTIEL
 }
 
 
@@ -12,8 +20,11 @@ export interface Reservation {
   statut: StatutReservation;
   nombrePlace: number;
   trajetId: string;
-  nomResponsable?: string;   
   billets?: Billet[];
+  nomResponsable?: string;   
+  user: User;
+  paiement: Paiement;
+  typeReservation: TypeReservation;
 }
 
 

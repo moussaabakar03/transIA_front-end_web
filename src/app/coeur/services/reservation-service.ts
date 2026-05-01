@@ -34,4 +34,10 @@ export class ReservationService {
   getPlacesTrajet(trajetId: string): Observable<number> {
     return this.http.get<number>(`${this.baseUrl}/trajet/${trajetId}`);
   }
+
+  getByTrajet(trajetId: string): Observable<Reservation[]> {
+    return this.http.get<Reservation[]>(`${this.baseUrl}/trajet/${trajetId}/liste`);
+  }
+
+  
 }
