@@ -25,11 +25,17 @@ export class AjoutVehiculeComponent {
   successMessage: string = '';
 
   readonly statusOptions = [
-    { value: 1, label: 'Disponible' },
-    { value: 2, label: 'En_Service' },
-    { value: 3, label: 'En_maintenance' },
-    { value: 4, label: 'Indisponible' }
+    { value: 1, label: 'Disponible', numeric: 1 },
+    { value: 2, label: 'En_Service', numeric: 2 },
+    { value: 3, label: 'En_maintenance', numeric: 3 },
+    { value: 4, label: 'Indisponible', numeric: 4 }
   ];
+
+  //  statusOptions = [
+  //   { value: 'ACTIF',       label: 'Actif',       numeric: 1 },
+  //   { value: 'MAINTENANCE', label: 'En maintenance', numeric: 2 },
+  //   { value: 'INACTIF',     label: 'Inactif',     numeric: 3 },
+  // ];
 
   constructor(
     private vehiculeService: VehiculeService,
@@ -41,16 +47,59 @@ export class AjoutVehiculeComponent {
     this.errorMessage = '';
     this.successMessage = '';
 
-    const payload = this.buildPayload();
+    // const payload = this.buildPayload();
+    // const validationError = this.validate(payload);
+
+    // if (validationError) {
+    //   this.errorMessage = validationError;
+    //   return;
+    // }
+
+    this.isSubmitting = true;
+
+    // this.vehiculeService.create(payload).pipe(
+    //   finalize(() => {
+    //     this.isSubmitting = false;
+    //     this.cdr.detectChanges();
+    //   })
+    // ).subscribe({
+    //   next: () => {
+    //     this.successMessage = 'Vehicule ajoute avec succes.';
+    //     this.resetForm();
+    //     setTimeout(() => this.router.navigate(['/vehicules/liste']), 600);
+    //   },
+    //   error: (err) => {
+    //     if (err.status === 400) {
+    //       this.errorMessage = 'Les informations du vehicule sont invalides.';
+    //     } else if (err.status === 409) {
+    //       this.errorMessage = "Cette immatriculation existe deja.";
+    //     } else if (err.status === 0) {
+    //       this.errorMessage = 'Impossible de joindre le serveur.';
+    //     } else {
+    //       this.errorMessage = "Une erreur est survenue lors de l'ajout du vehicule.";
+    //     }
+    //   }
+    // });
+
+    const statutOption = this.statusOptions.find(opt => opt.value === this.vehiculeForm.statut);
+    const statutNumeric = statutOption ? statutOption.numeric : 1;
+
+    const payload: VehiculePayload = {
+      marque: this.vehiculeForm.marque.trim(),
+      modele: this.vehiculeForm.modele.trim(),
+      immatriculation: this.vehiculeForm.immatriculation.trim().toUpperCase(),
+      capacite: Number(this.vehiculeForm.capacite),
+      statut: statutNumeric,
+      image: this.vehiculeForm.image?.trim() || null
+    };
+
     const validationError = this.validate(payload);
 
     if (validationError) {
       this.errorMessage = validationError;
       return;
     }
-
-    this.isSubmitting = true;
-
+          // Création
     this.vehiculeService.create(payload).pipe(
       finalize(() => {
         this.isSubmitting = false;
@@ -126,3 +175,4 @@ export class AjoutVehiculeComponent {
     };
   }
 }
+

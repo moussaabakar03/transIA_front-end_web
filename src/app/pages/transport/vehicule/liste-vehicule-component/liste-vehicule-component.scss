@@ -237,6 +237,44 @@ $gray:        #6B7280;
   font-family: 'Nunito', sans-serif;
 }
 
+// DETAIL BLOCKS (Mode Visualisation)
+.detail-block {
+  padding: 16px;
+  background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: $primary;
+    box-shadow: 0 4px 12px rgba($primary, 0.12);
+  }
+}
+
+.detail-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  i {
+    color: $primary;
+    font-size: 14px;
+  }
+}
+
+.detail-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: $dark;
+  word-break: break-word;
+}
+
 .preview-status-badge {
   font-size: 10px; font-weight: 700; padding: 2px 8px;
   border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;

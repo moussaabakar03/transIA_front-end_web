@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, ChangeDetectorRef } from '@angular/core';
 import { Ville } from '../../../../partages/models/ville';
 import { VilleService } from '../../../../coeur/services/ville-service';
 
@@ -15,7 +15,8 @@ interface FormErrors {
 
 enum ModalMode {
   AJOUT = 'ajout',
-  MODIFICATION = 'modification'
+  MODIFICATION = 'modification',
+  VISUALISATION = 'visualisation'
 }
 
 @Component({
@@ -48,7 +49,7 @@ export class ListeVilleComponent implements OnInit {
     'Centre', 'Sud', 'Est', 'Ouest', 'Ennedi'
   ];
 
-  constructor(private villeService: VilleService) {}
+  constructor(private villeService: VilleService, private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.loadVilles();
@@ -64,6 +65,7 @@ export class ListeVilleComponent implements OnInit {
         this.villes = data || [];
         this.filterVilles();
         this.isLoading = false;
+        this.cd.detectChanges(); // Forcer la détection de changement après chargement
       },
       error: (err) => {
         console.error('Erreur chargement villes:', err);
@@ -90,7 +92,20 @@ export class ListeVilleComponent implements OnInit {
 
   // Actions tableau
   onView(id: string): void {
-    // TODO : ouvrir modal détail ou naviguer
+    const ville = this.villes.find(v => v.id === id);
+    if (!ville) return;
+
+    this.editingVilleId = id;
+    this.modalMode = ModalMode.VISUALISATION;
+    this.villeForm = {
+      nomVille: ville.nomVille,
+      region: ville.region
+    };
+    this.formError = '';
+    this.formSuccess = '';
+    this.formErrors = {};
+    this.isModalOpen = true;
+    document.body.style.overflow = 'hidden';
   }
 
   onEdit(id: string): void {
@@ -103,6 +118,23 @@ export class ListeVilleComponent implements OnInit {
       nomVille: ville.nomVille,
       region: ville.region
     };
+
+    // modification de la ville  
+    this.villeService.updateVille({ ...ville, ...this.villeForm }).subscribe({
+      next: (modifiee) => {
+        // Mettre à jour la ville dans la liste
+        const index = this.villes.findIndex(v => v.id === id);
+        if (index !== -1) {
+          this.villes[index] = modifiee;
+          this.filteredVilles = [...this.villes];
+        }
+      },
+      error: (err) => {
+        console.error('Erreur modification ville:', err);
+      }
+    });
+
+
     this.formError = '';
     this.formSuccess = '';
     this.formErrors = {};
@@ -123,14 +155,16 @@ export class ListeVilleComponent implements OnInit {
       next: () => {
         this.villes = this.villes.filter(v => v.id !== id);
         this.filteredVilles = this.filteredVilles.filter(v => v.id !== id);
-        // Optionnel: afficher un message de succès
+        this.cd.detectChanges(); 
       },
       error: (err) => {
         console.error('Erreur suppression ville:', err);
         // alert('Erreur lors de la suppression de la ville.');
       }
     });
+
   }
+
 
   // Modal : ouverture / fermeture
   openModal(): void {

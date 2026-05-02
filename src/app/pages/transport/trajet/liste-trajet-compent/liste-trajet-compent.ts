@@ -1,10 +1,15 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, ChangeDetectorRef } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import { TrajetService } from '../../../../coeur/services/trajet-service';
 import { VilleService } from '../../../../coeur/services/ville-service';
 import { VehiculeService } from '../../../../coeur/services/vehicule-service';
+import { UserService } from '../../../../coeur/services/user-service';
 import { Trajet, StatutTrajet } from '../../../../partages/models/trajet';
 import { Ville } from '../../../../partages/models/ville';
 import { Vehicule } from '../../../../partages/models/vehicule';
+import { User } from '../../../../partages/models/users';
+import { Reservation } from '../../../../partages/models/reservation.model';
+import { ReservationService } from '../../../../coeur/services/reservation-service';
 
 interface TrajetForm {
   villeDepartId: string;
@@ -16,6 +21,7 @@ interface TrajetForm {
   dateDepart: string;
   heureDepart: string;
   statut: string;
+  chauffeurId: number;   // 0 signifie non sélectionné
 }
 
 interface FormErrors {
@@ -28,181 +34,236 @@ interface FormErrors {
   dateDepart?: string;
   heureDepart?: string;
   statut?: string;
+  chauffeurId?: string;
 }
 
 enum ModalMode {
   AJOUT = 'ajout',
-  MODIFICATION = 'modification'
+  MODIFICATION = 'modification',
+  VISUALISATION = 'visualisation'
 }
 
 @Component({
   selector: 'app-liste-trajet-compent',
   standalone: false,
   templateUrl: './liste-trajet-compent.html',
-  styleUrl: './liste-trajet-compent.scss',
+  styleUrls: ['./liste-trajet-compent.scss']
 })
 export class ListeTrajetCompent implements OnInit {
 
-  // ── Liste ─────────────────────────────────────────────────
   trajets: Trajet[] = [];
   filteredTrajets: Trajet[] = [];
   villes: Ville[] = [];
   vehicules: Vehicule[] = [];
-  searchTerm = '';
+  chauffeurs: User[] = [];
+
+  reservationsTrajet: Reservation[] = [];
+  loadingReservations = false;
+
   isLoading = true;
   errorMessage = '';
 
-  // ── Modal ─────────────────────────────────────────────────
+  searchTerm = '';
+  filterDateDebut = '';
+  filterDateFin = '';
+  filterStatut = '';
+
   isModalOpen = false;
   isSubmitting = false;
   formError = '';
   formSuccess = '';
   formErrors: FormErrors = {};
+
   modalMode: ModalMode = ModalMode.AJOUT;
   editingTrajetId: string | null = null;
-
   trajetForm: TrajetForm = this.emptyForm();
 
   statusOptions = [
     { value: 'PROGRAMME', label: 'Programmé', numeric: StatutTrajet.PROGRAMME },
-    { value: 'EN_COURS', label: 'En cours', numeric: StatutTrajet.EN_COURS },
-    { value: 'TERMINE', label: 'Terminé', numeric: StatutTrajet.TERMINE },
-    { value: 'ANNULE', label: 'Annulé', numeric: StatutTrajet.ANNULE },
+    { value: 'EN_COURS',   label: 'En cours',  numeric: StatutTrajet.EN_COURS },
+    { value: 'TERMINE',    label: 'Terminé',    numeric: StatutTrajet.TERMINE },
+    { value: 'ANNULE',     label: 'Annulé',     numeric: StatutTrajet.ANNULE },
   ];
 
   constructor(
     private trajetService: TrajetService,
     private villeService: VilleService,
-    private vehiculeService: VehiculeService
+    private vehiculeService: VehiculeService,
+    private userService: UserService,
+    private cd: ChangeDetectorRef,
+    private reservationService: ReservationService
   ) {}
 
   ngOnInit(): void {
     this.loadData();
   }
 
-  // ── Chargement ────────────────────────────────────────────
   loadData(): void {
     this.isLoading = true;
     this.errorMessage = '';
 
-    // Charger trajets, villes et véhicules en parallèle
-    this.trajetService.getAll().subscribe({
-      next: (data) => {
-        this.trajets = data;
+    forkJoin({
+      trajets: this.trajetService.getAll(),
+      villes: this.villeService.getAllVilles(),
+      vehicules: this.vehiculeService.getDisponibles(),
+      chauffeurs: this.userService.getChauffeurs()
+    }).subscribe({
+      next: results => {
+        this.trajets = results.trajets || [];
+        this.villes = results.villes || [];
+        this.vehicules = results.vehicules || [];
+        this.chauffeurs = results.chauffeurs || [];
         this.filterTrajets();
         this.isLoading = false;
+        this.cd.detectChanges();
       },
-      error: (err) => {
-        console.error('Erreur chargement trajets:', err);
+      error: err => {
+        console.error('Erreur chargement données:', err);
         this.errorMessage = 'Impossible de charger les trajets.';
         this.isLoading = false;
       }
     });
-
-    this.villeService.getAllVilles().subscribe({
-      next: (data) => {
-        this.villes = data || [];
-      },
-      error: (err) => {
-        console.error('Erreur chargement villes:', err);
-      }
-    });
-
-    this.vehiculeService.getAll().subscribe({
-      next: (data) => {
-        this.vehicules = data || [];
-      },
-      error: (err) => {
-        console.error('Erreur chargement véhicules:', err);
-      }
-    });
   }
 
-  // ── Filtre ────────────────────────────────────────────────
   filterTrajets(): void {
-    const t = this.searchTerm.toLowerCase().trim();
-    if (!t) {
-      this.filteredTrajets = [...this.trajets];
-    } else {
-      this.filteredTrajets = this.trajets.filter(tr => {
-        const villeDep = this.villes.find(v => v.id === tr.villeDepartId)?.nomVille || '';
-        const villeArr = this.villes.find(v => v.id === tr.villeArriveeId)?.nomVille || '';
-        const vehicule = this.vehicules.find(v => String(v.id) === tr.vehiculeId)?.immatriculation || '';
-        
-        return villeDep.toLowerCase().includes(t) ||
-               villeArr.toLowerCase().includes(t) ||
-               vehicule.toLowerCase().includes(t) ||
-               tr.distance.toString().includes(t) ||
-               tr.tarif.toString().includes(t);
-      });
+    const terme = this.searchTerm.toLowerCase().trim();
+    const debut = this.filterDateDebut ? new Date(this.filterDateDebut) : null;
+    const fin   = this.filterDateFin   ? new Date(this.filterDateFin)   : null;
+
+    this.filteredTrajets = this.trajets.filter(tr => {
+      if (terme) {
+        const villeDep = this.getVilleNom(tr.villeDepart?.id ?? '').toLowerCase();
+        const villeArr = this.getVilleNom(tr.villeArrivee?.id ?? '').toLowerCase();
+        const vehicule = this.getVehiculeImmatriculation(tr.vehicule?.id ?? '').toLowerCase();
+        if (!(villeDep.includes(terme) || villeArr.includes(terme) || vehicule.includes(terme) ||
+              tr.distance.toString().includes(terme) || tr.tarif.toString().includes(terme)))
+          return false;
+      }
+      if (debut && new Date(tr.dateDepart) < debut) return false;
+      if (fin   && new Date(tr.dateDepart) > fin)   return false;
+      if (this.filterStatut !== '') {
+        const opt = this.statusOptions.find(o => o.value === this.filterStatut);
+        if (opt && tr.statut !== opt.numeric) return false;
+      }
+      return true;
+    });
+  }
+
+  resetFiltres(): void {
+    this.searchTerm = '';
+    this.filterDateDebut = '';
+    this.filterDateFin = '';
+    this.filterStatut = '';
+    this.filterTrajets();
+  }
+
+  getVilleNom(id: string): string {
+    return this.villes.find(v => String(v.id) === String(id))?.nomVille || 'Inconnue';
+  }
+  getVehiculeImmatriculation(id: string): string {
+    return this.vehicules.find(v => String(v.id) === String(id))?.immatriculation || 'Inconnue';
+  }
+  getChauffeurNom(id: number): string {
+    const c = this.chauffeurs.find(ch => ch.id === id);
+    return c ? (c.fullName || c.username) : 'Inconnu';
+  }
+
+  getStatutLabel(statut: StatutTrajet | string): string {
+    if (typeof statut === 'string') {
+      return this.statusOptions.find(o => o.value === statut)?.label || statut;
     }
+    return this.statusOptions.find(o => o.numeric === statut)?.label || 'Inconnu';
   }
 
-  // ── Helpers pour l'affichage ──────────────────────────────
-  getVilleNom(villeId: string): string {
-    return this.villes.find(v => v.id === villeId)?.nomVille || 'Inconnue';
+  getStatutClass(statut: number) {
+    return {
+      'bg-primary': statut === 0,
+      'bg-warning': statut === 1,
+      'bg-success': statut === 2,
+      'bg-danger': statut === 3
+    };
   }
 
-  getVehiculeImmatriculation(vehiculeId: string): string {
-    return this.vehicules.find(v => String(v.id) === vehiculeId)?.immatriculation || 'Inconnue';
-  }
-
-  getStatutLabel(statut: StatutTrajet): string {
-    const option = this.statusOptions.find(opt => opt.numeric === statut);
-    return option ? option.label : 'Inconnu';
-  }
-
-  // ── Actions tableau ───────────────────────────────────────
+  // Actions
   onView(id: string): void {
-    // TODO : ouvrir modal détail ou naviguer
+    const t = this.trajets.find(tr => tr.id === id);
+    if (!t) return;
+    this.editingTrajetId = id;
+    this.modalMode = ModalMode.VISUALISATION;
+    this.trajetForm = this.trajetToForm(t);
+
+    // Charger les réservations du trajet
+    this.loadingReservations = true;
+    this.reservationService.getByTrajet(id).subscribe({
+      next: reservations => {
+        this.reservationsTrajet = reservations;
+        this.loadingReservations = false;
+        this.cd.detectChanges();
+      },
+      error: err => {
+        console.error('Erreur chargement réservations:', err);
+        this.reservationsTrajet = [];
+        this.loadingReservations = false;
+        this.cd.detectChanges();
+      }
+    });
+
+    this.openModalCommon();
   }
 
   onEdit(id: string): void {
-    const trajet = this.trajets.find(t => t.id === id);
-    if (!trajet) return;
-
+    const t = this.trajets.find(tr => tr.id === id);
+    if (!t) return;
     this.editingTrajetId = id;
     this.modalMode = ModalMode.MODIFICATION;
+    this.trajetForm = this.trajetToForm(t);
+    this.openModalCommon();
+  }
 
-    const statutString = this.statusOptions.find(opt => opt.numeric === trajet.statut)?.value || 'PROGRAMME';
-
-    this.trajetForm = {
-      villeDepartId: trajet.villeDepartId,
-      villeArriveeId: trajet.villeArriveeId,
-      vehiculeId: trajet.vehiculeId,
-      distance: trajet.distance,
-      dureeEstimee: trajet.dureeEstimee,
-      tarif: trajet.tarif,
-      dateDepart: trajet.dateDepart,
-      heureDepart: trajet.heureDepart,
-      statut: statutString
+  private trajetToForm(t: Trajet): TrajetForm {
+    const statutStr = this.statusOptions.find(o => o.numeric === t.statut)?.value || 'PROGRAMME';
+    return {
+      villeDepartId: t.villeDepart?.id ?? '',
+      villeArriveeId: t.villeArrivee?.id ?? '',
+      vehiculeId: t.vehicule?.id ?? '',
+      distance: t.distance,
+      dureeEstimee: t.dureeEstimee,
+      tarif: t.tarif,
+      dateDepart: t.dateDepart,
+      heureDepart: t.heureDepart,
+      statut: statutStr,
+      chauffeurId: t.chauffeurId || 0
     };
-
-    this.formError = '';
-    this.formSuccess = '';
-    this.formErrors = {};
-    this.isModalOpen = true;
-    document.body.style.overflow = 'hidden';
   }
 
   onDelete(id: string): void {
-    const trajet = this.trajets.find(t => t.id === id);
-    if (!trajet) return;
+    const t = this.trajets.find(tr => tr.id === id);
+    if (!t) return;
+    const dep = this.getVilleNom(t.villeDepart?.id ?? '');
+    const arr = this.getVilleNom(t.villeArrivee?.id ?? '');
+    if (!confirm(`Supprimer le trajet ${dep} → ${arr} du ${t.dateDepart} ?`)) return;
 
-    const villeDep = this.getVilleNom(trajet.villeDepartId);
-    const villeArr = this.getVilleNom(trajet.villeArriveeId);
-
-    if (!confirm(`Supprimer le trajet ${villeDep} → ${villeArr} du ${trajet.dateDepart} ? Cette action est irréversible.`)) return;
-
-    this.trajets = this.trajets.filter(t => t.id !== id);
-    this.filteredTrajets = this.filteredTrajets.filter(t => t.id !== id);
+    this.trajetService.delete(id).subscribe({
+      next: () => {
+        this.trajets = this.trajets.filter(tr => tr.id !== id);
+        this.filterTrajets();
+        this.cd.detectChanges();
+      },
+      error: err => {
+        console.error('Erreur suppression:', err);
+        alert('Erreur lors de la suppression.');
+      }
+    });
   }
 
-  // ── Modal : ouverture / fermeture ─────────────────────────
   openModal(): void {
     this.modalMode = ModalMode.AJOUT;
     this.editingTrajetId = null;
     this.trajetForm = this.emptyForm();
+    this.openModalCommon();
+  }
+
+  private openModalCommon(): void {
     this.formError = '';
     this.formSuccess = '';
     this.formErrors = {};
@@ -217,121 +278,85 @@ export class ListeTrajetCompent implements OnInit {
   }
 
   onOverlayClick(event: MouseEvent): void {
-    if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
-      this.closeModal();
-    }
+    if ((event.target as HTMLElement).classList.contains('modal-overlay')) this.closeModal();
   }
 
   @HostListener('document:keydown.escape')
-  onEscape(): void {
-    if (this.isModalOpen) this.closeModal();
-  }
+  onEscape(): void { if (this.isModalOpen) this.closeModal(); }
 
-  // ── Soumission ────────────────────────────────────────────
   submitForm(): void {
     this.formError = '';
     this.formSuccess = '';
     this.formErrors = {};
-
     let hasError = false;
 
-    if (!this.trajetForm.villeDepartId) {
-      this.formErrors.villeDepartId = 'La ville de départ est obligatoire.';
-      hasError = true;
+    const v = this.trajetForm;
+    if (!v.villeDepartId) { this.formErrors.villeDepartId = 'Obligatoire'; hasError = true; }
+    if (!v.villeArriveeId) { this.formErrors.villeArriveeId = 'Obligatoire'; hasError = true; }
+    if (v.villeDepartId && v.villeDepartId === v.villeArriveeId) {
+      this.formErrors.villeArriveeId = 'Doivent être différentes'; hasError = true;
     }
-
-    if (!this.trajetForm.villeArriveeId) {
-      this.formErrors.villeArriveeId = 'La ville d\'arrivée est obligatoire.';
-      hasError = true;
-    }
-
-    if (this.trajetForm.villeDepartId === this.trajetForm.villeArriveeId) {
-      this.formErrors.villeArriveeId = 'Les villes de départ et d\'arrivée doivent être différentes.';
-      hasError = true;
-    }
-
-    if (!this.trajetForm.vehiculeId) {
-      this.formErrors.vehiculeId = 'Le véhicule est obligatoire.';
-      hasError = true;
-    }
-
-    if (!this.trajetForm.distance || this.trajetForm.distance <= 0) {
-      this.formErrors.distance = 'La distance doit être supérieure à 0.';
-      hasError = true;
-    }
-
-    if (!this.trajetForm.dureeEstimee) {
-      this.formErrors.dureeEstimee = 'La durée estimée est obligatoire.';
-      hasError = true;
-    }
-
-    if (!this.trajetForm.tarif || this.trajetForm.tarif <= 0) {
-      this.formErrors.tarif = 'Le tarif doit être supérieur à 0.';
-      hasError = true;
-    }
-
-    if (!this.trajetForm.dateDepart) {
-      this.formErrors.dateDepart = 'La date de départ est obligatoire.';
-      hasError = true;
-    }
-
-    if (!this.trajetForm.heureDepart) {
-      this.formErrors.heureDepart = 'L\'heure de départ est obligatoire.';
-      hasError = true;
-    }
+    if (!v.vehiculeId)     { this.formErrors.vehiculeId     = 'Obligatoire'; hasError = true; }
+    if (!v.distance || v.distance <= 0) { this.formErrors.distance = '> 0'; hasError = true; }
+    if (!v.dureeEstimee)   { this.formErrors.dureeEstimee   = 'Obligatoire'; hasError = true; }
+    if (!v.tarif || v.tarif <= 0)     { this.formErrors.tarif = '> 0'; hasError = true; }
+    if (!v.dateDepart)     { this.formErrors.dateDepart     = 'Obligatoire'; hasError = true; }
+    if (!v.heureDepart)    { this.formErrors.heureDepart    = 'Obligatoire'; hasError = true; }
+    if (!v.chauffeurId)    { this.formErrors.chauffeurId    = 'Obligatoire'; hasError = true; }
 
     if (hasError) return;
 
     this.isSubmitting = true;
 
-    const statutOption = this.statusOptions.find(opt => opt.value === this.trajetForm.statut);
-    const statutNumeric = statutOption ? statutOption.numeric : StatutTrajet.PROGRAMME;
-
+    const statutNumeric = this.statusOptions.find(o => o.value === v.statut)?.numeric ?? StatutTrajet.PROGRAMME;
     const payload = {
-      villeDepartId: this.trajetForm.villeDepartId,
-      villeArriveeId: this.trajetForm.villeArriveeId,
-      vehiculeId: this.trajetForm.vehiculeId,
-      distance: Number(this.trajetForm.distance),
-      dureeEstimee: this.trajetForm.dureeEstimee.trim(),
-      tarif: Number(this.trajetForm.tarif),
-      dateDepart: this.trajetForm.dateDepart,
-      heureDepart: this.trajetForm.heureDepart,
-      statut: statutNumeric
+      villeDepartId: v.villeDepartId,
+      villeArriveeId: v.villeArriveeId,
+      vehiculeId: v.vehiculeId,
+      distance: Number(v.distance),
+      dureeEstimee: v.dureeEstimee.trim(),
+      tarif: Number(v.tarif),
+      dateDepart: v.dateDepart,
+      heureDepart: v.heureDepart,
+      statut: statutNumeric,
+      chauffeurId: v.chauffeurId
     };
 
     if (this.modalMode === ModalMode.AJOUT) {
       this.trajetService.create(payload).subscribe({
-        next: (nouveau) => {
+        next: nouveau => {
           this.isSubmitting = false;
           this.formSuccess = 'Trajet enregistré avec succès !';
           this.trajets.push(nouveau);
-          this.filteredTrajets = [...this.trajets];
+          this.filterTrajets();
           setTimeout(() => this.closeModal(), 1200);
         },
-        error: (err) => {
+        error: err => {
           this.isSubmitting = false;
-          console.error('Erreur création trajet:', err);
-          this.formError = 'Erreur lors de l\'enregistrement. Veuillez réessayer.';
+          console.error('Erreur création:', err);
+          this.formError = 'Erreur lors de l\'enregistrement.';
         }
       });
     } else {
       if (!this.editingTrajetId) return;
-
-      const index = this.trajets.findIndex(t => t.id === this.editingTrajetId);
-      if (index !== -1) {
-        this.trajets[index] = {
-          ...this.trajets[index],
-          ...payload
-        };
-        this.filteredTrajets = [...this.trajets];
-        this.isSubmitting = false;
-        this.formSuccess = 'Trajet modifié avec succès !';
-        setTimeout(() => this.closeModal(), 1200);
-      }
+      this.trajetService.update(this.editingTrajetId, payload).subscribe({
+        next: updated => {
+          this.isSubmitting = false;
+          this.formSuccess = 'Trajet modifié avec succès !';
+          const idx = this.trajets.findIndex(t => t.id === this.editingTrajetId);
+          if (idx !== -1) this.trajets[idx] = updated;
+          this.filterTrajets();
+          setTimeout(() => this.closeModal(), 1200);
+        },
+        error: err => {
+          this.isSubmitting = false;
+          console.error('Erreur modification:', err);
+          this.formError = 'Erreur lors de la modification.';
+        }
+      });
     }
   }
 
-  // ── Helpers ───────────────────────────────────────────────
   private emptyForm(): TrajetForm {
     return {
       villeDepartId: '',
@@ -342,13 +367,12 @@ export class ListeTrajetCompent implements OnInit {
       tarif: null,
       dateDepart: '',
       heureDepart: '',
-      statut: 'PROGRAMME'
+      statut: 'PROGRAMME',
+      chauffeurId: 0
     };
   }
 
   onFieldChange(field: keyof FormErrors): void {
-    if (this.formErrors[field]) {
-      delete this.formErrors[field];
-    }
+    if (this.formErrors[field]) delete this.formErrors[field];
   }
 }

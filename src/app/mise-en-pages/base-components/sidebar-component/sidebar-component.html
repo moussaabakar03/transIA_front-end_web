@@ -1,93 +1,130 @@
-<!-- LOGO -->
-<div class="navbar-brand-box">
-  <!-- Logo pour thème clair (light) -->
-  <a routerLink="/dashboard" class="logo logo-light">
-    <span class="logo-sm">
-      <img src="assets/images/logo-sm.png" alt="TransIa" height="22">
-    </span>
-    <span class="logo-lg">
-      <img src="assets/images/logo-light.png" alt="TransIa" height="17">
-    </span>
-  </a>
-  <!-- Logo pour thème sombre (optionnel) -->
-  <a routerLink="/dashboard" class="logo logo-dark">
-    <span class="logo-sm">
-      <img src="assets/images/logo-sm.png" alt="TransIa" height="22">
-    </span>
-    <span class="logo-lg">
-      <img src="assets/images/logo-dark.png" alt="TransIa" height="17">
-    </span>
-  </a>
-  <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
-    <i class="ri-record-circle-line"></i>
-  </button>
-</div>
+<aside class="left-sidebar">
+  <!-- Sidebar scroll-->
+  <div>
+    <div class="brand-logo d-flex align-items-center justify-content-between">
+      <a href="./index.html" class="text-nowrap logo-img">
+        <img src="/assets/images/logos/logo.svg" alt="" />
+      </a>
+      <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
+        <i class="ti ti-x fs-6"></i>
+      </div>
+    </div>
+    <!-- Sidebar navigation-->
+    <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+      <ul id="sidebarnav">
+        <li class="nav-small-cap">
+          <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-4"></iconify-icon>
+          <span class="hide-menu">Home</span>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" href="./index.html" aria-expanded="false">
+            <i class="ti ti-atom"></i>
+            <span class="hide-menu">Dashboard</span>
+          </a>
+        </li>
 
-<div id="scrollbar">
-  <div class="container-fluid">
-    <div id="two-column-menu"></div>
-
-    <ul class="navbar-nav" id="navbar-nav">
-      <li class="menu-title"><span data-key="t-menu">Menu</span></li>
-
-      <!-- Dashboard -->
-      <li class="nav-item">
-        <a class="nav-link menu-link" data-bs-toggle="collapse" href="#sidebarDashboards" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-          <i class="las la-tachometer-alt"></i>
-          <span data-key="t-dashboards">Tableau de bord</span>
-        </a>
-        <div class="collapse menu-dropdown" id="sidebarDashboards">
-          <ul class="nav nav-sm flex-column">
-            <li class="nav-item">
-              <a routerLink="/dashboard" routerLinkActive="active" class="nav-link" data-key="t-analytics">Vue d'ensemble</a>
+        <!-- ---------------------------------- -->
+        <!-- Transport -->
+        <!-- ---------------------------------- -->
+        <li class="sidebar-item">
+          <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)" aria-expanded="false">
+            <div class="d-flex align-items-center gap-3">
+              <span class="d-flex">
+                <i class="ti ti-car"></i>
+              </span>
+              <span class="hide-menu">Véhicule</span>
+            </div>
+          </a>
+          <ul aria-expanded="false" class="collapse first-level">
+            <!-- Véhicule -->
+            <li class="sidebar-item">
+              <a class="sidebar-link justify-content-between" routerLink="/vehicules/liste">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Liste</span>
+                </div>
+              </a>
             </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link justify-content-between" routerLink="/vehicules/ajout">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Ajout</span>
+                </div>
+              </a>
+            </li>
+           
           </ul>
-        </div>
-      </li>
+        </li>
 
-      <!-- Transport -->
-      <li class="nav-item">
-        <a class="nav-link menu-link" data-bs-toggle="collapse" href="#sidebarTransport" role="button" aria-expanded="false" aria-controls="sidebarTransport">
-          <i class="las la-truck"></i>
-          <span data-key="t-transport">Transport</span>
-        </a>
-        <div class="collapse menu-dropdown" id="sidebarTransport">
-          <ul class="nav nav-sm flex-column">
-            <!-- Véhicules -->
-            <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="collapse" href="#sidebarVehicule" role="button" aria-expanded="false" aria-controls="sidebarVehicule">
-                <i class="las la-car"></i> Véhicules
+        <li class="sidebar-item">
+          <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)" aria-expanded="false">
+            <div class="d-flex align-items-center gap-3">
+              <span class="d-flex">
+                <i class="ti ti-route"></i>
+              </span>
+              <span class="hide-menu">Trajet</span>
+            </div>
+          </a>
+          <ul aria-expanded="false" class="collapse first-level">
+            <!-- Trajet -->
+            <li class="sidebar-item">
+              <a class="sidebar-link justify-content-between" routerLink="/trajets/liste">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Liste</span>
+                </div>
               </a>
-              <div class="collapse menu-dropdown" id="sidebarVehicule">
-                <ul class="nav nav-sm flex-column">
-                  <li class="nav-item">
-                    <a routerLink="/vehicules/liste" routerLinkActive="active" class="nav-link">Liste</a>
-                  </li>
-                  <li class="nav-item">
-                    <a routerLink="/vehicules/ajout" routerLinkActive="active" class="nav-link">Ajouter</a>
-                  </li>
-                </ul>
-              </div>
             </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link justify-content-between" routerLink="/trajets/ajout">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Ajout</span>
+                </div>
+              </a>
+            </li>
+           
+          </ul>
+        </li>
 
-            <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="collapse" href="#sidebarVille" role="button" aria-expanded="false" aria-controls="sidebarVille">
-                <i class="las la-city"></i> Villes
+        <li class="sidebar-item">
+          <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)" aria-expanded="false">
+            <div class="d-flex align-items-center gap-3">
+              <span class="d-flex">
+                <i class="ti ti-building"></i>
+              </span>
+              <span class="hide-menu">Ville</span>
+            </div>
+          </a>
+          <ul aria-expanded="false" class="collapse first-level">
+            <!-- Ville -->
+            <li class="sidebar-item">
+              <a class="sidebar-link justify-content-between" routerLink="/villes/liste">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Liste</span>
+                </div>
               </a>
-              <div class="collapse menu-dropdown" id="sidebarVille">
-                <ul class="nav nav-sm flex-column">
-                  <li class="nav-item">
-                    <a routerLink="/villes/liste" routerLinkActive="active" class="nav-link">Liste</a>
-                  </li>
-                  <li class="nav-item">
-                    <a routerLink="/villes/ajout" routerLinkActive="active" class="nav-link">Ajouter</a>
-                  </li>
-                </ul>
-              </div>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="collapse" href="#sidebarTrajet" role="button" aria-expanded="false" aria-controls="sidebarTrajet">
-                <i class="las la-route"></i> Trajets
+            <li class="sidebar-item">
+              <a class="sidebar-link justify-content-between" routerLink="/villes/ajout">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Ajout</span>
+                </div>
               </a>
               <div class="collapse menu-dropdown" id="sidebarTrajet">
                 <ul class="nav nav-sm flex-column">
@@ -101,28 +138,86 @@
               </div>
             </li>
           </ul>
-        </div>
-      </li>
+        </li>
 
-      <!-- Administration (optionnel) -->
-      <li class="nav-item">
-        <a class="nav-link menu-link" data-bs-toggle="collapse" href="#sidebarAdmin" role="button" aria-expanded="false" aria-controls="sidebarAdmin">
-          <i class="las la-cog"></i>
-          <span>Utilisateurs</span>
-        </a>
-        <div class="collapse menu-dropdown" id="sidebarAdmin">
-          <ul class="nav nav-sm flex-column">
-            <li class="nav-item">
-              <a routerLink="/utilisateurs/liste" routerLinkActive="active" class="nav-link">Chauffeurs</a>
+        <!-- reservations -->
+         <li class="sidebar-item">
+          <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)" aria-expanded="false">
+            <div class="d-flex align-items-center gap-3">
+              <span class="d-flex">
+                <i class="ti ti-calendar"></i>
+              </span>
+              <span class="hide-menu">Réservation</span>
+            </div>
+          </a>
+          <ul aria-expanded="false" class="collapse first-level">
+            <!-- Réservation -->
+            <li class="sidebar-item">
+              <a class="sidebar-link justify-content-between" routerLink="/reservations/liste">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Liste</span>
+                </div>
+              </a>
             </li>
-            <li class="nav-item">
-              <a routerLink="/clients/liste" routerLinkActive="active" class="nav-link">Clients</a>
+            <li class="sidebar-item">
+              <a class="sidebar-link justify-content-between" routerLink="/reservations/ajout">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Ajout</span>
+                </div>
+              </a>
             </li>
           </ul>
-        </div>
-      </li>
-    </ul>
-  </div>
-</div>
+        </li>
 
-<div class="sidebar-background"></div>
+        <li>
+          <span class="sidebar-divider lg"></span>
+        </li>
+        <li class="nav-small-cap">
+          <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-4"></iconify-icon>
+          <span class="hide-menu">Auth</span>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" href="./authentication-login.html" aria-expanded="false">
+            <i class="ti ti-login"></i>
+            <span class="hide-menu">Login</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link justify-content-between" href="#" aria-expanded="false">
+            <div class="d-flex align-items-center gap-3">
+              <span class="d-flex">
+                <i class="ti ti-login"></i>
+              </span>
+              <span class="hide-menu">Side Login</span>
+            </div>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" href="./authentication-register.html" aria-expanded="false">
+            <i class="ti ti-user-plus"></i>
+            <span class="hide-menu">Register</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link justify-content-between" href="#" aria-expanded="false">
+            <div class="d-flex align-items-center gap-3">
+              <span class="d-flex">
+                <i class="ti ti-user-plus"></i>
+              </span>
+              <span class="hide-menu">Side Register</span>
+            </div>
+          </a>
+        </li>
+        
+      </ul>
+    </nav>
+    <!-- End Sidebar navigation -->
+  </div>
+  <!-- End Sidebar scroll-->
+</aside>

@@ -1,13 +1,14 @@
 // liste-vehicule-component.ts
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, ChangeDetectorRef } from '@angular/core';
 import { VehiculeService } from '../../../../coeur/services/vehicule-service';
-import { Vehicule, VehiculePayload } from '../../../../partages/models/vehicule';
+import { StatutVehicule, Vehicule, VehiculePayload } from '../../../../partages/models/vehicule';
+import { error } from 'console';
 
 interface VehiculeForm {
   marque:         string;
   modele:         string;
   immatriculation:string;
-  capacite:       number | null;
+  capacite:       number;
   statut:         string;
   image:          string;
 }
@@ -23,7 +24,8 @@ interface FormErrors {
 
 enum ModalMode {
   AJOUT = 'ajout',
-  MODIFICATION = 'modification'
+  MODIFICATION = 'modification',
+  VISUALISATION = 'visualisation'
 }
 
 @Component({
@@ -48,17 +50,30 @@ export class ListeVehiculeComponent implements OnInit {
   formSuccess  = '';
   formErrors: FormErrors = {};
   modalMode: ModalMode = ModalMode.AJOUT;
-  editingVehiculeId: number | null = null;
+  editingVehiculeId: string | null = null;
 
   vehiculeForm: VehiculeForm = this.emptyForm();
 
+  // readonly StatutVehicule = StatutVehicule;     
+
+//   getStatutLabel(statut: number): string {
+//     switch (statut) {
+//       case StatutVehicule.En_maintenance: return 'Disponible';
+//       case StatutVehicule.En_Service: return 'En service';
+//       case StatutVehicule.En_maintenance: return 'En maintenance';
+//       case StatutVehicule.Indisponible: return 'Indisponible';
+//       default: return '—';
+//     }
+// }
+
   statusOptions = [
-    { value: 'ACTIF',       label: 'Actif',       numeric: 1 },
-    { value: 'MAINTENANCE', label: 'En maintenance', numeric: 2 },
-    { value: 'INACTIF',     label: 'Inactif',     numeric: 3 },
+    { value: 'Disponible',       label: 'Disponible',       numeric: 1 },
+    { value: 'En_Service', label: 'En service', numeric: 2 },
+    { value: 'En_maintenance',     label: 'En maintenance',     numeric: 3 },
+    { value: 'Indisponible',     label: 'Indisponible',     numeric: 4 },
   ];
 
-  constructor(private vehiculeService: VehiculeService) {}
+  constructor(private vehiculeService: VehiculeService, private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.loadVehicules();
@@ -77,6 +92,7 @@ export class ListeVehiculeComponent implements OnInit {
         this.filterVehicules();
         // console.log('Véhicules chargés:', this.vehicules);
         this.isLoading = false;
+        this.cd.detectChanges(); // Forcer la détection de changement après chargement
       },
       error: (err) => {
         console.error('Erreur chargement véhicules:', err);
@@ -87,23 +103,6 @@ export class ListeVehiculeComponent implements OnInit {
       }
     });
   }
-
-  //   loadVehicules(): void {
-  //   this.isLoading   = true;
-  //   this.errorMessage = '';
-
-  //   this.vehiculeService.getAll().subscribe({
-  //     next: (data) => {
-  //       this.vehicules         = data;
-  //       this.filteredVehicules = data;
-  //       this.isLoading         = false;
-  //     },
-  //     error: () => {
-  //       this.errorMessage = 'Impossible de charger les véhicules.';
-  //       this.isLoading    = false;
-  //     }
-  //   });
-  // }
 
   // ── Filtre ────────────────────────────────────────────────
   filterVehicules(): void {
@@ -121,19 +120,14 @@ export class ListeVehiculeComponent implements OnInit {
 
 
   // ── Actions tableau ───────────────────────────────────────// Actions tableau
-  onView(id: number): void {
-    // TODO : ouvrir modal détail ou naviguer
-  }
-
-  onEdit(id: number): void {
+  onView(id: string): void {
     const vehicule = this.vehicules.find(v => v.id === id);
     if (!vehicule) return;
 
     this.editingVehiculeId = id;
-    this.modalMode = ModalMode.MODIFICATION;
+    this.modalMode = ModalMode.VISUALISATION;
     
-    // Convertir le statut numérique en chaîne pour le formulaire
-    const statutString = this.statusOptions.find(opt => opt.numeric === vehicule.status)?.value || 'ACTIF';
+    const statutString = this.statusOptions.find(opt => opt.numeric === vehicule.statut)?.value || 'ACTIF';
     
     this.vehiculeForm = {
       marque: vehicule.marque,
@@ -151,19 +145,79 @@ export class ListeVehiculeComponent implements OnInit {
     document.body.style.overflow = 'hidden';
   }
 
-  onDelete(id: number): void {
+  onEdit(id: string): void {
+    const vehicule = this.vehicules.find(v => v.id === id);
+    if (!vehicule) return;
+
+    this.editingVehiculeId = id;
+    this.modalMode = ModalMode.MODIFICATION;
+    
+    // Convertir le statut numérique en chaîne pour le formulaire
+    // const statutString = this.statusOptions.find(opt => opt.numeric === vehicule.statut)?.value || 'ACTIF';
+    
+    this.vehiculeForm = {
+      marque: vehicule.marque,
+      modele: vehicule.modele,
+      immatriculation: vehicule.immatriculation,
+      capacite: vehicule.capacite,
+      statut: vehicule.statut.toString(), // Utiliser la valeur numérique directement
+      image: vehicule.image || ''
+    };
+    
+    this.vehiculeService.update(id,{
+      marque: this.vehiculeForm.marque.trim(),
+      modele: this.vehiculeForm.modele.trim(),
+      immatriculation: this.vehiculeForm.immatriculation.trim().toUpperCase(),
+      capacite: Number(this.vehiculeForm.capacite),
+      statut: Number(this.vehiculeForm.statut), // Envoyer la valeur numérique
+      image: this.vehiculeForm.image?.trim() || null
+    }).subscribe({
+      next: (modifie) => {
+        this.formSuccess = 'Véhicule modifié avec succès !';
+        // Mettre à jour la liste locale
+        const index = this.vehicules.findIndex(v => v.id === id);
+        if (index !== -1) {
+          this.vehicules[index] = modifie;
+          this.filterVehicules();
+        }
+        setTimeout(() => this.closeModal(), 1200);
+      },
+      error: (err) => {
+        console.error('Erreur modification véhicule:', err);
+        this.formError = "Erreur lors de la modification. Veuillez réessayer.";
+      }
+    });
+  
+    this.formError = '';
+    this.formSuccess = '';
+    this.formErrors = {};
+    this.isModalOpen = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  onDelete(id: string): void {
     const vehicule = this.vehicules.find(v => v.id === id);
     if (!vehicule) return;
 
     if (!confirm(`Supprimer le véhicule "${vehicule.marque} ${vehicule.modele}" (${vehicule.immatriculation}) ? Cette action est irréversible.`)) return;
 
-    // TODO: Appeler le service de suppression quand il sera disponible
-    // this.vehiculeService.delete(id).subscribe({...});
-    
-    // Pour l'instant, suppression locale
-    this.vehicules = this.vehicules.filter(v => v.id !== id);
-    this.filteredVehicules = this.filteredVehicules.filter(v => v.id !== id);
+    this.vehiculeService.delete(id).subscribe({
+      next: () => {
+        // Suppression locale UNIQUEMENT si la requête réussit
+        this.vehicules = this.vehicules.filter(v => v.id !== id);
+        this.filteredVehicules = this.filteredVehicules.filter(v => v.id !== id);
+        this.cd.detectChanges(); 
+
+      },
+      error: (err) => {
+        console.error('Erreur suppression véhicule:', err);
+        // Essayer de lire le message du serveur
+        const serverMsg = err.error?.message || err.error?.error || err.statusText;
+        alert(`Erreur lors de la suppression : ${serverMsg || 'Veuillez réessayer.'}`);
+      }
+    });
   }
+
 
   // ── Modal : ouverture / fermeture ─────────────────────────
   openModal(): void {
@@ -233,15 +287,19 @@ export class ListeVehiculeComponent implements OnInit {
     this.isSubmitting = true;
 
     // Conversion du statut string vers nombre
-    const statutOption = this.statusOptions.find(opt => opt.value === this.vehiculeForm.statut);
-    const statutNumeric = statutOption ? statutOption.numeric : 1;
+    // const statutOption = this.statusOptions.find(opt => opt.value === this.vehiculeForm.statut);
+    // const statutNumeric = statutOption ? statutOption.numeric : 1;
 
     const payload: VehiculePayload = {
       marque: this.vehiculeForm.marque.trim(),
       modele: this.vehiculeForm.modele.trim(),
       immatriculation: this.vehiculeForm.immatriculation.trim().toUpperCase(),
       capacite: Number(this.vehiculeForm.capacite),
-      statut: statutNumeric,
+      statut: this.vehiculeForm.statut === 'Disponible' ? StatutVehicule.Disponible :
+             this.vehiculeForm.statut === 'En_Service' ? StatutVehicule.En_Service :
+             this.vehiculeForm.statut === 'En_maintenance' ? StatutVehicule.En_maintenance :
+             this.vehiculeForm.statut === 'Indisponible' ? StatutVehicule.Indisponible :
+             StatutVehicule.Disponible, // valeur par défaut
       image: this.vehiculeForm.image?.trim() || null
     };
 
@@ -307,7 +365,7 @@ export class ListeVehiculeComponent implements OnInit {
 
   // ── Helpers ───────────────────────────────────────────────
   private emptyForm(): VehiculeForm {
-    return { marque: '', modele: '', immatriculation: '', capacite: null, statut: 'ACTIF', image: '' };
+    return { marque: '', modele: '', immatriculation: '', capacite: 0, statut: 'ACTIF', image: '' };
   }
 
   // Nettoyer les erreurs d'un champ quand il est modifié

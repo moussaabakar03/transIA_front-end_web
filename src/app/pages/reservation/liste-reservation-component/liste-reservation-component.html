@@ -1,0 +1,533 @@
+<div class="reservation-list-container">
+
+  <!-- En-tête -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="mb-1 fw-bold">Gestion des réservations</h4>
+      <p class="text-muted mb-0">Consultez et gérez toutes les réservations</p>
+    </div>
+    <button class="btn btn-primary" (click)="openModal()">
+      <i class="las la-plus me-1"></i> Nouvelle réservation
+    </button>
+  </div>
+
+  <!-- Recherche -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-6">
+          <div class="search-box">
+            <i class="las la-search"></i>
+            <input type="text" class="form-control"
+                   placeholder="Rechercher par ville, passager..."
+                   [(ngModel)]="searchTerm" (input)="applyFilter()" />
+          </div>
+        </div>
+        <div class="col-md-6 d-flex justify-content-end gap-2 align-items-center">
+          <span class="text-muted small">{{ filteredReservations.length }} réservation(s)</span>
+          <button class="btn btn-soft-secondary btn-sm" (click)="loadData()" title="Actualiser">
+            <i class="las la-sync-alt"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chargement / Erreur -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+    <p class="mt-2 text-muted">Chargement...</p>
+  </div>
+  <div *ngIf="errorMessage && !isLoading" class="alert alert-danger">{{ errorMessage }}</div>
+
+  <!-- Tableau -->
+  <div *ngIf="!isLoading && !errorMessage" class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Trajet</th>
+              <th>Date</th>
+              <th>Places</th>
+              <th>Responsable</th>
+              <th>Type</th>
+              <th>Montant</th>
+              <th>Statut</th>
+              <th style="width:160px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="filteredReservations.length === 0">
+              <td colspan="9" class="text-center py-5">Aucune réservation trouvée</td>
+            </tr>
+            <tr *ngFor="let res of filteredReservations; let i = index">
+              <td><span class="fw-semibold text-primary">#{{ i+1 }}</span></td>
+              <td>{{ getTrajetDescription(res.trajetId) }}</td>
+              <td class="small text-muted">{{ res.dateReservation | date:'dd/MM/yy HH:mm' }}</td>
+              <td>{{ res.nombrePlace }}</td>
+              <td>{{ res.nomResponsable || '—' }}</td>
+              <td>
+                <span class="badge rounded-pill"
+                      [class.bg-primary]="res.typeReservation === 1"
+                      [class.bg-info]="res.typeReservation !== 1">
+                  {{ res.typeReservation === 1 ? 'En ligne' : 'Présentiel' }}
+                </span>
+              </td>
+              <td>
+                <strong class="text-success">
+                  {{ (getTrajet(res.trajetId)?.tarif || 0) * res.nombrePlace | number }} FCFA
+                </strong>
+              </td>
+              <td>
+                <span class="badge rounded-pill"
+                      [class.bg-warning]="res.statut === 'EN_ATTENTE'"
+                      [class.bg-success]="res.statut === 'CONFIRMEE'"
+                      [class.bg-danger]="res.statut === 'ANNULEE'"
+                      [class.bg-secondary]="res.statut === 'EXPIREE'">
+                  {{ getStatutLabel(res.statut) }}
+                </span>
+              </td>
+              <td>
+                <div class="hstack gap-1">
+                  <button class="btn btn-soft-primary btn-sm" title="Voir"
+                          (click)="onView(res.id!)">
+                    <i class="las la-eye"></i>
+                  </button>
+                  <button class="btn btn-soft-info btn-sm" title="Modifier"
+                          (click)="onEdit(res.id!)"
+                          [disabled]="res.statut !== 'EN_ATTENTE'">
+                    <i class="las la-pen"></i>
+                  </button>
+                  <!-- Bouton Payer : uniquement présentiel + en attente -->
+                  <button class="btn btn-soft-success btn-sm" title="Encaisser le paiement"
+                          (click)="onPayer(res.id!)"
+                        >
+                    <i class="las la-cash-register"></i>
+                  </button>
+                  <button class="btn btn-soft-danger btn-sm" title="Annuler"
+                          (click)="onAnnuler(res.id!)"
+                          [disabled]="res.statut !== 'EN_ATTENTE' && res.statut !== 'CONFIRMEE'">
+                    <i class="las la-ban"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ╔══════════════════════════════════════════════════════╗ -->
+<!-- ║              MODAL — RÉSERVATION                    ║ -->
+<!-- ╚══════════════════════════════════════════════════════╝ -->
+<div class="modal-overlay" [class.show]="isModalOpen" (click)="closeModal()">
+  <div class="modal-box" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+
+    <div class="modal-box-header">
+      <div class="modal-title-group">
+        <div class="modal-icon"><i class="las la-ticket-alt"></i></div>
+        <div>
+          <h5>
+            {{ modalMode === 'ajout' ? 'Nouvelle réservation'
+             : modalMode === 'visualisation' ? 'Détails de la réservation'
+             : 'Modifier la réservation' }}
+          </h5>
+          <p class="text-muted mb-0 small">
+            {{ modalMode === 'ajout' ? 'Renseignez les informations'
+             : modalMode === 'visualisation' ? 'Consultation uniquement'
+             : 'Modifiez les informations' }}
+          </p>
+        </div>
+      </div>
+      <button class="modal-close-btn" (click)="closeModal()"><i class="las la-times"></i></button>
+    </div>
+
+    <div class="modal-box-body">
+      <div *ngIf="formError"   class="alert alert-danger d-flex gap-2 align-items-center">
+        <i class="las la-exclamation-circle fs-5"></i> {{ formError }}
+      </div>
+      <div *ngIf="formSuccess" class="alert alert-success d-flex gap-2 align-items-center">
+        <i class="las la-check-circle fs-5"></i> {{ formSuccess }}
+      </div>
+
+      <!-- VISUALISATION -->
+      <div *ngIf="modalMode === 'visualisation'">
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="detail-block">
+              <div class="detail-label"><i class="las la-route me-1"></i>Trajet</div>
+              <div class="detail-value">{{ getTrajetDescription(form.trajetId) }}</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="detail-block">
+              <div class="detail-label"><i class="las la-chair me-1"></i>Places</div>
+              <div class="detail-value">{{ form.nombrePlace }}</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="detail-block">
+              <div class="detail-label"><i class="las la-tag me-1"></i>Type</div>
+              <div class="detail-value">{{ form.typeReservation === 1 ? 'Présentiel' : 'En ligne' }}</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="detail-block">
+              <div class="detail-label"><i class="las la-user me-1"></i>Responsable</div>
+              <div class="detail-value fw-semibold">{{ form.nomResponsable }}</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="detail-block">
+              <div class="detail-label"><i class="las la-money-bill me-1"></i>Montant total</div>
+              <div class="detail-value text-success fw-bold">
+                {{ (getTrajet(form.trajetId)?.tarif || 0) * form.nombrePlace | number }} FCFA
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="detail-block">
+              <div class="detail-label"><i class="las la-users me-1"></i>Autres passagers</div>
+              <div class="detail-value">
+                <span *ngIf="form.nomsPassagers.length === 0" class="text-muted fst-italic">
+                  Noms auto générés
+                </span>
+                <span *ngFor="let n of form.nomsPassagers; let j = index"
+                      class="badge bg-light text-dark border me-1">
+                  {{ n }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Billets -->
+        <div *ngIf="form.billets.length > 0">
+          <h6 class="fw-semibold mb-2"><i class="las la-ticket-alt me-1"></i>Billets générés</h6>
+          <div class="row g-2">
+            <div class="col-md-6" *ngFor="let billet of form.billets; let i = index">
+              <div class="card border p-2">
+                <p class="mb-1 small fw-semibold">Passager {{ i+1 }} : {{ billet.nomPassager }}</p>
+                <p class="mb-0 text-muted" style="font-size:11px; word-break:break-all">
+                  <i class="las la-qrcode me-1"></i>{{ billet.qrCode }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORMULAIRE AJOUT / MODIFICATION -->
+      <div *ngIf="modalMode !== 'visualisation'" class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Trajet <span class="text-danger">*</span></label>
+          <select class="form-select" [(ngModel)]="form.trajetId"
+                  [disabled]="isSubmitting" (ngModelChange)="onFieldChange('trajetId')">
+            <option value="">-- Sélectionner un trajet --</option>
+            <option *ngFor="let t of trajets" [value]="t.id">
+              {{ t.villeDepart.nomVille }} → {{ t.villeArrivee.nomVille }}
+              — {{ t.dateDepart }} {{ t.heureDepart }}
+              — {{ t.tarif | number }} FCFA/place
+            </option>
+          </select>
+          <div *ngIf="formErrors.trajetId" class="field-error">
+            <i class="las la-exclamation-circle"></i> {{ formErrors.trajetId }}
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Nombre de places <span class="text-danger">*</span></label>
+          <input type="number" min="1" class="form-control"
+                 [(ngModel)]="form.nombrePlace"
+                 [disabled]="isSubmitting"
+                 (ngModelChange)="onNombrePlaceChange()" />
+          <div *ngIf="formErrors.nombrePlace" class="field-error">
+            <i class="las la-exclamation-circle"></i> {{ formErrors.nombrePlace }}
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Nom du responsable <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" placeholder="Ex : Jean Dupont"
+                 [(ngModel)]="form.nomResponsable"
+                 [disabled]="isSubmitting"
+                 (ngModelChange)="onFieldChange('nomResponsable')" />
+          <div *ngIf="formErrors.nomResponsable" class="field-error">
+            <i class="las la-exclamation-circle"></i> {{ formErrors.nomResponsable }}
+          </div>
+        </div>
+
+        <!-- Récap montant -->
+        <div class="col-12" *ngIf="form.trajetId && form.nombrePlace >= 1">
+          <div class="alert alert-info d-flex align-items-center justify-content-between py-2 mb-0">
+            <span><i class="las la-calculator me-2"></i>Montant à payer</span>
+            <strong>
+              {{ (getTrajet(form.trajetId)?.tarif || 0) }} × {{ form.nombrePlace }}
+              = {{ (getTrajet(form.trajetId)?.tarif || 0) * form.nombrePlace | number }} FCFA
+            </strong>
+          </div>
+        </div>
+
+        <!-- Passagers supplémentaires -->
+        <div class="col-12" *ngIf="nombrePassagersSupplementaires > 0">
+          <div class="card border-0 bg-light p-3">
+            <p class="fw-semibold mb-2">
+              <i class="las la-users me-1 text-primary"></i>
+              Voulez-vous saisir les noms des autres passagers ?
+              <span class="text-muted fw-normal small ms-1">
+                ({{ nombrePassagersSupplementaires }} passager(s) supplémentaire(s))
+              </span>
+            </p>
+            <div class="d-flex gap-4 mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="saisiePassagers" id="saisieOui"
+                       [checked]="saisirNomsPassagers === true"
+                       (change)="onChoixSaisie(true)" />
+                <label class="form-check-label" for="saisieOui">
+                  <i class="las la-pen me-1"></i> Oui, je saisis les noms
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="saisiePassagers" id="saisieNon"
+                       [checked]="saisirNomsPassagers === false"
+                       (change)="onChoixSaisie(false)" />
+                <label class="form-check-label" for="saisieNon">
+                  <i class="las la-magic me-1"></i> Non, noms auto générés
+                </label>
+              </div>
+            </div>
+
+            <div *ngIf="saisirNomsPassagers === false"
+                 class="alert alert-info d-flex align-items-center gap-2 mb-0 py-2">
+              <i class="las la-info-circle fs-5"></i>
+              <span class="small">
+                Les {{ nombrePassagersSupplementaires }} passager(s) seront nommés
+                <strong>« Invité N de {{ form.nomResponsable || 'Responsable' }} »</strong>.
+              </span>
+            </div>
+
+            <div *ngIf="saisirNomsPassagers === true">
+              <div *ngFor="let champ of champsPassagers; let j = index"
+                   class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-primary rounded-pill" style="min-width:28px">{{ j+2 }}</span>
+                <input type="text" class="form-control form-control-sm"
+                       [placeholder]="'Nom du passager ' + (j+2) + ' (optionnel)'"
+                       [(ngModel)]="champsPassagers[j]"
+                       [disabled]="isSubmitting" />
+                <button type="button" class="btn btn-soft-danger btn-sm"
+                        (click)="supprimerChampPassager(j)" [disabled]="isSubmitting">
+                  <i class="las la-trash-alt"></i>
+                </button>
+              </div>
+              <div *ngIf="champsPassagers.length < nombrePassagersSupplementaires"
+                   class="alert alert-warning py-2 d-flex align-items-center gap-2 my-2">
+                <i class="las la-info-circle"></i>
+                <span class="small">
+                  {{ nombrePassagersSupplementaires - champsPassagers.length }} passager(s)
+                  sans nom → nom automatique attribué.
+                </span>
+              </div>
+              <button *ngIf="champsPassagers.length < nombrePassagersSupplementaires"
+                      type="button" class="btn btn-soft-secondary btn-sm"
+                      (click)="ajouterChampPassager()" [disabled]="isSubmitting">
+                <i class="las la-plus me-1"></i> Ajouter un champ
+              </button>
+              <p class="text-muted small mb-0 mt-2">
+                <i class="las la-lightbulb me-1"></i>
+                Champ vide = nom automatique attribué par le système.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label text-muted">Utilisateur lié <small>(optionnel)</small></label>
+          <select class="form-select" [(ngModel)]="form.userId" [disabled]="isSubmitting">
+            <option [ngValue]="null">-- Aucun --</option>
+            <option *ngFor="let u of users" [ngValue]="u.id">
+              {{ u.nom || u.fullName }} ({{ u.username }})
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-box-footer">
+      <button class="btn btn-light" (click)="closeModal()" [disabled]="isSubmitting">
+        {{ modalMode === 'visualisation' ? 'Fermer' : 'Annuler' }}
+      </button>
+      <button *ngIf="modalMode !== 'visualisation'"
+              class="btn btn-primary" (click)="submitForm()" [disabled]="isSubmitting">
+        <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+        <i *ngIf="!isSubmitting" class="las la-save me-1"></i>
+        {{ isSubmitting ? 'Enregistrement...' : (modalMode === 'ajout' ? 'Enregistrer' : 'Modifier') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ╔══════════════════════════════════════════════════════╗ -->
+<!-- ║              MODAL — PAIEMENT CAISSE                ║ -->
+<!-- ╚══════════════════════════════════════════════════════╝ -->
+<div class="modal-overlay" [class.show]="isPaiementModalOpen" (click)="closePaiementModal()">
+  <div class="modal-box modal-box-sm" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+
+    <!-- En-tête -->
+    <div class="modal-box-header">
+      <div class="modal-title-group">
+        <div class="modal-icon" style="background: #d1fae5; color: #065f46;">
+          <i class="las la-cash-register"></i>
+        </div>
+        <div>
+          <h5>Encaissement — Paiement caisse</h5>
+          <p class="text-muted mb-0 small" *ngIf="reservationEnCours">
+            {{ getTrajetDescription(reservationEnCours.trajetId) }}
+            &mdash; {{ reservationEnCours.nomResponsable }}
+          </p>
+        </div>
+      </div>
+      <button class="modal-close-btn" (click)="closePaiementModal()"
+              [disabled]="isPaiementSubmitting">
+        <i class="las la-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-box-body" *ngIf="reservationEnCours">
+
+      <!-- Alertes -->
+      <div *ngIf="paiementError"
+           class="alert alert-danger d-flex align-items-center gap-2">
+        <i class="las la-exclamation-circle fs-5"></i> {{ paiementError }}
+      </div>
+      <div *ngIf="paiementSuccess"
+           class="alert alert-success d-flex align-items-center gap-2">
+        <i class="las la-check-circle fs-5"></i> {{ paiementSuccess }}
+      </div>
+
+      <!-- Récap de la réservation -->
+      <div class="card border-0 mb-3" style="background: #f0fdf4">
+        <div class="card-body py-3">
+          <div class="row g-2 text-center">
+            <div class="col-4">
+              <div class="small text-muted">Places</div>
+              <div class="fw-bold fs-5">{{ reservationEnCours.nombrePlace }}</div>
+            </div>
+            <div class="col-4">
+              <div class="small text-muted">Tarif / place</div>
+              <div class="fw-bold fs-5">
+                {{ getTrajet(reservationEnCours.trajetId)?.tarif | number }} FCFA
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="small text-muted">Total à payer</div>
+              <div class="fw-bold fs-4 text-success">
+                {{ montantAttendu | number }} FCFA
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+
+        <!-- Montant versé -->
+        <div class="col-12">
+          <label class="form-label">
+            Montant versé (FCFA) <span class="text-danger">*</span>
+          </label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="las la-money-bill-wave"></i></span>
+            <input type="number" class="form-control form-control-lg"
+                   [min]="montantAttendu"
+                   [(ngModel)]="paiementForm.montantVerse"
+                   [disabled]="isPaiementSubmitting"
+                   placeholder="Saisir le montant reçu"
+                   [class.is-invalid]="paiementErrors.montantVerse"
+                   [class.is-valid]="paiementForm.montantVerse && montantSuffisant" />
+            <button type="button" class="btn btn-outline-secondary"
+                    title="Remplir avec le montant exact"
+                    (click)="remplirMontantExact()"
+                    [disabled]="isPaiementSubmitting">
+              <i class="las la-equals"></i> Exact
+            </button>
+          </div>
+          <div *ngIf="paiementErrors.montantVerse" class="field-error">
+            <i class="las la-exclamation-circle"></i> {{ paiementErrors.montantVerse }}
+          </div>
+
+          <!-- Monnaie à rendre (temps réel) -->
+          <div *ngIf="paiementForm.montantVerse && montantSuffisant && monnaieARendre > 0"
+               class="alert alert-warning d-flex align-items-center justify-content-between py-2 mt-2 mb-0">
+            <span><i class="las la-hand-holding-usd me-1"></i>Monnaie à rendre</span>
+            <strong class="fs-5">{{ monnaieARendre | number }} FCFA</strong>
+          </div>
+          <div *ngIf="paiementForm.montantVerse && montantSuffisant && monnaieARendre === 0"
+               class="alert alert-success d-flex align-items-center gap-2 py-2 mt-2 mb-0">
+            <i class="las la-check-circle"></i>
+            <span>Montant exact — pas de monnaie.</span>
+          </div>
+        </div>
+
+        <!-- Mode de paiement -->
+        <div class="col-12">
+          <label class="form-label">Mode de paiement <span class="text-danger">*</span></label>
+          <div class="row g-2">
+            <div class="col-6" *ngFor="let mode of modesPaiement">
+              <div class="card border p-2 text-center"
+                   style="cursor:pointer; transition: all .15s"
+                   [class.border-success]="paiementForm.modePaiement === mode.value"
+                   [style.background]="paiementForm.modePaiement === mode.value ? '#f0fdf4' : ''"
+                   (click)="!isPaiementSubmitting && (paiementForm.modePaiement = mode.value);
+                            paiementErrors.modePaiement = undefined">
+                <i class="las {{ mode.icon }} fs-4 mb-1 d-block"
+                   [class.text-success]="paiementForm.modePaiement === mode.value"
+                   [class.text-muted]="paiementForm.modePaiement !== mode.value"></i>
+                <span class="small fw-semibold">{{ mode.label }}</span>
+                <div *ngIf="paiementForm.modePaiement === mode.value"
+                     class="small text-success"><i class="las la-check-circle me-1"></i>Sélectionné</div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="paiementErrors.modePaiement" class="field-error mt-1">
+            <i class="las la-exclamation-circle"></i> {{ paiementErrors.modePaiement }}
+          </div>
+        </div>
+
+        <!-- Référence (optionnel) -->
+        <div class="col-12">
+          <label class="form-label text-muted">
+            Référence de paiement <small>(optionnel — auto si vide)</small>
+          </label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="las la-hashtag"></i></span>
+            <input type="text" class="form-control"
+                   [(ngModel)]="paiementForm.reference"
+                   [disabled]="isPaiementSubmitting"
+                   placeholder="Ex : REC-2024-001" />
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Pied -->
+    <div class="modal-box-footer">
+      <button class="btn btn-light" (click)="closePaiementModal()"
+              [disabled]="isPaiementSubmitting">
+        Annuler
+      </button>
+      <button class="btn btn-success" (click)="submitPaiement()"
+              [disabled]="isPaiementSubmitting || !montantSuffisant">
+        <span *ngIf="isPaiementSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+        <i *ngIf="!isPaiementSubmitting" class="las la-check-circle me-1"></i>
+        {{ isPaiementSubmitting ? 'Encaissement...' : 'Valider le paiement' }}
+      </button>
+    </div>
+
+  </div>
+</div>

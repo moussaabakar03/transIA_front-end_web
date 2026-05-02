@@ -138,8 +138,12 @@
           <i class="las la-map-marked-alt"></i>
         </div>
         <div>
-          <h5 id="modalTitle">{{ modalMode === 'ajout' ? 'Nouvelle ville' : 'Modifier la ville' }}</h5>
-          <p>{{ modalMode === 'ajout' ? 'Renseignez les informations de la ville' : 'Modifiez les informations de la ville' }}</p>
+          <h5 id="modalTitle">
+            {{ modalMode === 'ajout' ? 'Nouvelle ville' : modalMode === 'visualisation' ? 'Détails de la ville' : 'Modifier la ville' }}
+          </h5>
+          <p>
+            {{ modalMode === 'ajout' ? 'Renseignez les informations de la ville' : modalMode === 'visualisation' ? 'Consultez les informations de la ville' : 'Modifiez les informations de la ville' }}
+          </p>
         </div>
       </div>
       <button type="button" class="modal-close-btn" (click)="closeModal()" aria-label="Fermer">
@@ -162,8 +166,30 @@
 
       <div class="modal-form-grid">
 
-        <!-- Colonne gauche : formulaire -->
-        <div class="modal-form-fields">
+        <!-- MODE VISUALISATION : Affichage en blocs -->
+        <div *ngIf="modalMode === 'visualisation'" style="grid-column: 1 / -1;">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="detail-block">
+                <div class="detail-label">
+                  <i class="las la-city me-2"></i>Nom de la ville
+                </div>
+                <div class="detail-value">{{ villeForm.nomVille }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="detail-block">
+                <div class="detail-label">
+                  <i class="las la-globe-africa me-2"></i>Région
+                </div>
+                <div class="detail-value">{{ villeForm.region }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODE AJOUT/MODIFICATION : Formulaire -->
+        <div *ngIf="modalMode !== 'visualisation'" class="modal-form-fields">
           <div class="row g-3">
 
             <div class="col-12">
@@ -203,8 +229,8 @@
           </div>
         </div>
 
-        <!-- Colonne droite : aperçu -->
-        <div class="modal-preview">
+        <!-- Colonne droite : aperçu (uniquement en ajout/modification) -->
+        <div *ngIf="modalMode !== 'visualisation'" class="modal-preview">
           <p class="preview-label">Aperçu en direct</p>
           <div class="preview-card">
             <div class="preview-img-box">
@@ -236,9 +262,9 @@
     <!-- Pied modal -->
     <div class="modal-box-footer">
       <button type="button" class="btn btn-light" (click)="closeModal()" [disabled]="isSubmitting">
-        Annuler
+        {{ modalMode === 'visualisation' ? 'Fermer' : 'Annuler' }}
       </button>
-      <button type="button" class="btn btn-primary" (click)="submitForm()" [disabled]="isSubmitting">
+      <button *ngIf="modalMode !== 'visualisation'" type="button" class="btn btn-primary" (click)="submitForm()" [disabled]="isSubmitting">
         <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status"></span>
         <i *ngIf="!isSubmitting" class="las la-save me-1"></i>
         {{ isSubmitting ? (modalMode === 'ajout' ? 'Enregistrement...' : 'Modification...') : (modalMode === 'ajout' ? 'Enregistrer' : 'Modifier') }}

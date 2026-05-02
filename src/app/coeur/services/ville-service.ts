@@ -16,7 +16,7 @@ export class VilleService {
     return this.http.get<Ville[]>(`${environment.backendurl}/ville`);
   }
   
-  getVilleById(id: number): Observable<Ville> {
+  getVilleById(id: string): Observable<Ville> {
     return this.http.get<Ville>(`${environment.backendurl}/ville/${id}`);
   }
 
@@ -27,7 +27,7 @@ export class VilleService {
 
   
   updateVille(ville: Ville): Observable<Ville> {
-    return this.http.put<Ville>(`${environment.backendurl}/ville`, ville);
+    return this.http.put<Ville>(`${environment.backendurl}/ville/${ville.id}`, ville);
   }
   
   deleteVille(id: string): Observable<void> {

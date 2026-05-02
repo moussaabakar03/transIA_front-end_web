@@ -108,12 +108,17 @@
               <td><span class="fw-medium">{{ vehicule.immatriculation }}</span></td>
               <td><i class="las la-user-friends me-1 text-muted"></i>{{ vehicule.capacite }} places</td>
               <td>
-                <span class="badge rounded-pill"
-                  [class.bg-success]="vehicule.status === 1"
-                  [class.bg-warning]="vehicule.status === 2"
-                  [class.bg-danger]="vehicule.status === 3">
-                  {{ vehicule.status }}
-                </span>
+                <!-- <span class="badge rounded-pill"
+                  [class.bg-success]="vehicule.statut === StatutVehicule.Disponible"
+                  [class.bg-warning]="vehicule.statut === StatutVehicule.En_Service"
+                  [class.bg-danger]="vehicule.statut === StatutVehicule.Indisponible">
+                  {{ getStatutLabel(vehicule.statut) }}
+                </span> -->
+
+                <span>{{ vehicule.statut }}</span>
+
+
+               
               </td>
               <td>
                 <div class="hstack gap-2">
@@ -155,8 +160,12 @@
           <i class="las la-truck"></i>
         </div>
         <div>
-          <h5 id="modalTitle">{{ modalMode === 'ajout' ? 'Nouveau véhicule' : 'Modifier le véhicule' }}</h5>
-          <p>{{ modalMode === 'ajout' ? 'Renseignez les informations du véhicule' : 'Modifiez les informations du véhicule' }}</p>
+          <h5 id="modalTitle">
+            {{ modalMode === 'ajout' ? 'Nouveau véhicule' : modalMode === 'visualisation' ? 'Détails du véhicule' : 'Modifier le véhicule' }}
+          </h5>
+          <p>
+            {{ modalMode === 'ajout' ? 'Renseignez les informations du véhicule' : modalMode === 'visualisation' ? 'Consultez les informations du véhicule' : 'Modifiez les informations du véhicule' }}
+          </p>
         </div>
       </div>
       <button type="button" class="modal-close-btn" (click)="closeModal()" aria-label="Fermer">
@@ -179,129 +188,188 @@
 
       <div class="modal-form-grid">
 
-        <!-- Colonne gauche : formulaire -->
-        <div class="modal-form-fields">
-          <div class="row g-3">
-
+        <!-- MODE VISUALISATION : Affichage en blocs -->
+        <div *ngIf="modalMode === 'visualisation'" style="grid-column: 1 / -1;">
+          <div class="row g-4">
             <div class="col-md-6">
-              <label class="form-label" for="m-marque">Marque</label>
-              <div class="input-icon-wrap">
-                <i class="las la-tag"></i>
-                <input id="m-marque" name="marque" type="text" class="form-control"
-                  [(ngModel)]="vehiculeForm.marque" [disabled]="isSubmitting"
-                  (ngModelChange)="onFieldChange('marque')"
-                  placeholder="Ex : Toyota" />
-              </div>
-              <div *ngIf="formErrors.marque" class="field-error">
-                <i class="las la-exclamation-circle"></i>
-                {{ formErrors.marque }}
+              <div class="detail-block">
+                <div class="detail-label"><i class="las la-tag me-2"></i>Marque</div>
+                <div class="detail-value">{{ vehiculeForm.marque }}</div>
               </div>
             </div>
-
             <div class="col-md-6">
-              <label class="form-label" for="m-modele">Modèle</label>
-              <div class="input-icon-wrap">
-                <i class="las la-car"></i>
-                <input id="m-modele" name="modele" type="text" class="form-control"
-                  [(ngModel)]="vehiculeForm.modele" [disabled]="isSubmitting"
-                  (ngModelChange)="onFieldChange('modele')"
-                  placeholder="Ex : Hiace" />
-              </div>
-              <div *ngIf="formErrors.modele" class="field-error">
-                <i class="las la-exclamation-circle"></i>
-                {{ formErrors.modele }}
+              <div class="detail-block">
+                <div class="detail-label"><i class="las la-car me-2"></i>Modèle</div>
+                <div class="detail-value">{{ vehiculeForm.modele }}</div>
               </div>
             </div>
-
             <div class="col-md-6">
-              <label class="form-label" for="m-immat">Immatriculation</label>
-              <div class="input-icon-wrap">
-                <i class="las la-id-card"></i>
-                <input id="m-immat" name="immatriculation" type="text" class="form-control immat-input"
-                  [(ngModel)]="vehiculeForm.immatriculation" [disabled]="isSubmitting"
-                  (ngModelChange)="onFieldChange('immatriculation')"
-                  placeholder="Ex : LT-245-AB" />
-              </div>
-              <div *ngIf="formErrors.immatriculation" class="field-error">
-                <i class="las la-exclamation-circle"></i>
-                {{ formErrors.immatriculation }}
+              <div class="detail-block">
+                <div class="detail-label"><i class="las la-id-card me-2"></i>Immatriculation</div>
+                <div class="detail-value">{{ vehiculeForm.immatriculation }}</div>
               </div>
             </div>
-
             <div class="col-md-6">
-              <label class="form-label" for="m-capacite">Capacité (places)</label>
-              <div class="input-icon-wrap">
-                <i class="las la-users"></i>
-                <input id="m-capacite" name="capacite" type="number" min="1" class="form-control"
-                  [(ngModel)]="vehiculeForm.capacite" [disabled]="isSubmitting"
-                  (ngModelChange)="onFieldChange('capacite')"
-                  placeholder="Ex : 14" />
-              </div>
-              <div *ngIf="formErrors.capacite" class="field-error">
-                <i class="las la-exclamation-circle"></i>
-                {{ formErrors.capacite }}
+              <div class="detail-block">
+                <div class="detail-label"><i class="las la-users me-2"></i>Capacité</div>
+                <div class="detail-value">{{ vehiculeForm.capacite }} places</div>
               </div>
             </div>
-
             <div class="col-md-6">
-              <label class="form-label" for="m-status">Statut</label>
-              <div class="input-icon-wrap">
-                <i class="las la-toggle-on"></i>
-                <select id="m-status" name="status" class="form-select"
-                  [(ngModel)]="vehiculeForm.statut" [disabled]="isSubmitting">
-                  <option *ngFor="let opt of statusOptions" [ngValue]="opt.value">
-                    {{ opt.label }}
-                  </option>
-                </select>
+              <div class="detail-block">
+                <div class="detail-label"><i class="las la-toggle-on me-2"></i>Statut</div>
+                <div class="detail-value">
+                  <span class="badge rounded-pill"
+                    [class.bg-success]="vehiculeForm.statut === 'Disponible'"
+                    [class.bg-warning]="vehiculeForm.statut === 'En_Service'"
+                    [class.bg-secondary]="vehiculeForm.statut === 'En_maintenance' || vehiculeForm.statut === 'Indisponible'">
+                    {{ vehiculeForm.statut || '—' }}
+                  </span>
+                </div>
               </div>
             </div>
-
             <div class="col-md-6">
-              <label class="form-label" for="m-image">Image URL</label>
-              <div class="input-icon-wrap">
-                <i class="las la-image"></i>
-                <input id="m-image" name="image" type="url" class="form-control"
-                  [(ngModel)]="vehiculeForm.image" [disabled]="isSubmitting"
-                  placeholder="https://..." />
+              <div class="detail-block">
+                <div class="detail-label"><i class="las la-image me-2"></i>Image</div>
+                <div class="detail-value">
+                  <small class="text-muted">{{ vehiculeForm.image || 'Aucune image' }}</small>
+                </div>
               </div>
             </div>
-
           </div>
         </div>
 
-        <!-- Colonne droite : aperçu -->
-        <div class="modal-preview">
-          <p class="preview-label">Aperçu en direct</p>
-          <div class="preview-card">
-            <div class="preview-img-box">
-              <img *ngIf="vehiculeForm.image; else previewDefault"
-                [src]="vehiculeForm.image" [alt]="vehiculeForm.marque"
-                class="preview-img" />
-              <ng-template #previewDefault>
-                <div class="preview-placeholder">
-                  <i class="las la-car-side"></i>
+        <!-- MODE AJOUT/MODIFICATION : Formulaire -->
+        <div *ngIf="modalMode !== 'visualisation'">
+          <div class="modal-form-fields">
+            <div class="row g-3">
+
+              <div class="col-md-6">
+                <label class="form-label" for="m-marque">Marque</label>
+                <div class="input-icon-wrap">
+                  <i class="las la-tag"></i>
+                  <input id="m-marque" name="marque" type="text" class="form-control"
+                    [(ngModel)]="vehiculeForm.marque" [disabled]="isSubmitting"
+                    (ngModelChange)="onFieldChange('marque')"
+                    placeholder="Ex : Toyota" />
                 </div>
-              </ng-template>
+                <div *ngIf="formErrors.marque" class="field-error">
+                  <i class="las la-exclamation-circle"></i>
+                  {{ formErrors.marque }}
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="m-modele">Modèle</label>
+                <div class="input-icon-wrap">
+                  <i class="las la-car"></i>
+                  <input id="m-modele" name="modele" type="text" class="form-control"
+                    [(ngModel)]="vehiculeForm.modele" [disabled]="isSubmitting"
+                    (ngModelChange)="onFieldChange('modele')"
+                    placeholder="Ex : Hiace" />
+                </div>
+                <div *ngIf="formErrors.modele" class="field-error">
+                  <i class="las la-exclamation-circle"></i>
+                  {{ formErrors.modele }}
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="m-immat">Immatriculation</label>
+                <div class="input-icon-wrap">
+                  <i class="las la-id-card"></i>
+                  <input id="m-immat" name="immatriculation" type="text" class="form-control immat-input"
+                    [(ngModel)]="vehiculeForm.immatriculation" [disabled]="isSubmitting"
+                    (ngModelChange)="onFieldChange('immatriculation')"
+                    placeholder="Ex : LT-245-AB" />
+                </div>
+                <div *ngIf="formErrors.immatriculation" class="field-error">
+                  <i class="las la-exclamation-circle"></i>
+                  {{ formErrors.immatriculation }}
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="m-capacite">Capacité (places)</label>
+                <div class="input-icon-wrap">
+                  <i class="las la-users"></i>
+                  <input id="m-capacite" name="capacite" type="number" min="1" class="form-control"
+                    [(ngModel)]="vehiculeForm.capacite" [disabled]="isSubmitting"
+                    (ngModelChange)="onFieldChange('capacite')"
+                    placeholder="Ex : 14" />
+                </div>
+                <div *ngIf="formErrors.capacite" class="field-error">
+                  <i class="las la-exclamation-circle"></i>
+                  {{ formErrors.capacite }}
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="m-status">Statut</label>
+                <div class="input-icon-wrap">
+                  <i class="las la-toggle-on"></i>
+                  <select id="m-status" name="status" class="form-select"
+                    [(ngModel)]="vehiculeForm.statut" [disabled]="isSubmitting">
+                    <!-- <option *ngFor="let opt of statusOptions" [ngValue]="opt.value">
+                      {{ opt.label }}
+                    </option> -->
+                    <option value="Disponible">Disponible</option>
+                    <option value="En_Service">En service</option>
+                    <option value="En_maintenance">En maintenance</option>
+                    <option value="Indisponible">Indisponible</option>
+
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="m-image">Image URL</label>
+                <div class="input-icon-wrap">
+                  <i class="las la-image"></i>
+                  <input id="m-image" name="image" type="url" class="form-control"
+                    [(ngModel)]="vehiculeForm.image" [disabled]="isSubmitting"
+                    placeholder="https://..." />
+                </div>
+              </div>
+
             </div>
-            <div class="preview-info">
-              <div class="preview-title">
-                {{ vehiculeForm.marque || 'Marque' }} {{ vehiculeForm.modele || 'Modèle' }}
+          </div>
+
+          <!-- Colonne droite : aperçu -->
+          <div class="modal-preview">
+            <p class="preview-label">Aperçu en direct</p>
+            <div class="preview-card">
+              <div class="preview-img-box">
+                <img *ngIf="vehiculeForm.image; else previewDefault"
+                  [src]="vehiculeForm.image" [alt]="vehiculeForm.marque"
+                  class="preview-img" />
+                <ng-template #previewDefault>
+                  <div class="preview-placeholder">
+                    <i class="las la-car-side"></i>
+                  </div>
+                </ng-template>
               </div>
-              <div class="preview-immat">
-                {{ vehiculeForm.immatriculation || 'LT-XXX-XX' }}
-              </div>
-              <div class="preview-row">
-                <span>Capacité</span>
-                <span>{{ vehiculeForm.capacite || 0 }} places</span>
-              </div>
-              <div class="preview-row">
-                <span>Statut</span>
-                <span class="preview-status-badge"
-                  [class.s-actif]="vehiculeForm.statut === 'ACTIF'"
-                  [class.s-maint]="vehiculeForm.statut === 'MAINTENANCE'"
-                  [class.s-inactif]="vehiculeForm.statut === 'INACTIF'">
-                  {{ vehiculeForm.statut || '—' }}
-                </span>
+              <div class="preview-info">
+                <div class="preview-title">
+                  {{ vehiculeForm.marque || 'Marque' }} {{ vehiculeForm.modele || 'Modèle' }}
+                </div>
+                <div class="preview-immat">
+                  {{ vehiculeForm.immatriculation || 'LT-XXX-XX' }}
+                </div>
+                <div class="preview-capacity">
+                  <i class="las la-users-class me-2"></i>
+                  <span>{{ vehiculeForm.capacite || '0' }} places</span>
+                </div>
+                <div class="preview-row">
+                  <span class="preview-label-small">Statut</span>
+                  <span class="preview-status-badge"
+                    [class.s-Disponible]="vehiculeForm.statut === 'Disponible'"
+                    [class.s-En_Service]="vehiculeForm.statut === 'En_Service'"
+                    [class.s-En_maintenance]="vehiculeForm.statut === 'En_maintenance'"
+                    [class.s-Indisponible]="vehiculeForm.statut === 'Indisponible'">
+                    {{ vehiculeForm.statut || '—' }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -313,9 +381,9 @@
     <!-- Pied modal -->
     <div class="modal-box-footer">
       <button type="button" class="btn btn-light" (click)="closeModal()" [disabled]="isSubmitting">
-        Annuler
+        {{ modalMode === 'visualisation' ? 'Fermer' : 'Annuler' }}
       </button>
-      <button type="button" class="btn btn-primary" (click)="submitForm()" [disabled]="isSubmitting">
+      <button *ngIf="modalMode !== 'visualisation'" type="button" class="btn btn-primary" (click)="submitForm()" [disabled]="isSubmitting">
         <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status"></span>
         <i *ngIf="!isSubmitting" class="las la-save me-1"></i>
         {{ isSubmitting ? (modalMode === 'ajout' ? 'Enregistrement...' : 'Modification...') : (modalMode === 'ajout' ? 'Enregistrer' : 'Modifier') }}

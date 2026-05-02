@@ -1,63 +1,86 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { TrajetService } from '../../../../coeur/services/trajet-service';
 import { VilleService } from '../../../../coeur/services/ville-service';
 import { VehiculeService } from '../../../../coeur/services/vehicule-service';
+import { UserService } from '../../../../coeur/services/user-service';
 import { StatutTrajet } from '../../../../partages/models/trajet';
 import { Ville } from '../../../../partages/models/ville';
 import { Vehicule } from '../../../../partages/models/vehicule';
+import { User } from '../../../../partages/models/users';
 
-interface TrajetPayload {
+// Reprise du modèle de formulaire du composant liste (string pour statut, nombre pour chauffeur)
+interface TrajetForm {
   villeDepartId: string;
   villeArriveeId: string;
   vehiculeId: string;
-  distance: number;
+  distance: number | null;
   dureeEstimee: string;
-  tarif: number;
+  tarif: number | null;
   dateDepart: string;
   heureDepart: string;
-  statut: StatutTrajet;
+  statut: string;
+  chauffeurId: number;   // 0 = non sélectionné
+}
+
+interface FormErrors {
+  villeDepartId?: string;
+  villeArriveeId?: string;
+  vehiculeId?: string;
+  distance?: string;
+  dureeEstimee?: string;
+  tarif?: string;
+  dateDepart?: string;
+  heureDepart?: string;
+  statut?: string;
+  chauffeurId?: string;
 }
 
 @Component({
   selector: 'app-ajout-trajet-component',
   standalone: false,
   templateUrl: './ajout-trajet-component.html',
-  styleUrl: './ajout-trajet-component.scss',
+  styleUrls: ['./ajout-trajet-component.scss']
 })
 export class AjoutTrajetComponent implements OnInit {
-  trajetForm: TrajetPayload = {
+
+  trajetForm: TrajetForm = {
     villeDepartId: '',
     villeArriveeId: '',
     vehiculeId: '',
-    distance: 0,
+    distance: null,
     dureeEstimee: '',
-    tarif: 0,
+    tarif: null,
     dateDepart: '',
     heureDepart: '',
-    statut: StatutTrajet.PROGRAMME
+    statut: 'PROGRAMME',
+    chauffeurId: 0
   };
 
   villes: Ville[] = [];
   vehicules: Vehicule[] = [];
+  chauffeurs: User[] = [];
 
-  isSubmitting: boolean = false;
-  isLoading: boolean = false;
-  errorMessage: string = '';
-  successMessage: string = '';
+  isSubmitting = false;
+  isLoading = false;
+  errorMessage = '';
+  successMessage = '';
+  formErrors: FormErrors = {};
 
-  readonly statusOptions = [
-    { value: StatutTrajet.PROGRAMME, label: 'Programmé' },
-    { value: StatutTrajet.EN_COURS, label: 'En cours' },
-    { value: StatutTrajet.TERMINE, label: 'Terminé' },
-    { value: StatutTrajet.ANNULE, label: 'Annulé' }
+  statusOptions = [
+    { value: 'PROGRAMME', label: 'Programmé', numeric: StatutTrajet.PROGRAMME },
+    { value: 'EN_COURS',   label: 'En cours',  numeric: StatutTrajet.EN_COURS },
+    { value: 'TERMINE',    label: 'Terminé',    numeric: StatutTrajet.TERMINE },
+    { value: 'ANNULE',     label: 'Annulé',     numeric: StatutTrajet.ANNULE },
   ];
 
   constructor(
     private trajetService: TrajetService,
     private villeService: VilleService,
     private vehiculeService: VehiculeService,
+    private userService: UserService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -67,48 +90,80 @@ export class AjoutTrajetComponent implements OnInit {
   }
 
   loadData(): void {
-    // this.isLoading = true;
-    
-    this.villeService.getAllVilles().subscribe({
-      next: (data) => {
-        this.villes = data || [];
+    this.isLoading = true;
+    forkJoin({
+      villes: this.villeService.getAllVilles(),
+      vehicules: this.vehiculeService.getDisponibles(),
+      chauffeurs: this.userService.getChauffeurs()
+    }).subscribe({
+      next: results => {
+        this.villes = results.villes || [];
+        this.vehicules = results.vehicules || [];
+        this.chauffeurs = results.chauffeurs || [];
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
-      error: (err: any) => {
-        console.error('Erreur chargement villes:', err);
-        this.isLoading = false;
-      }
-    });
-
-    this.vehiculeService.getAll().subscribe({
-      next: (data) => {
-        this.vehicules = data || [];
-        this.isLoading = false;
-      },
-      error: (err: any) => {
-        console.error('Erreur chargement véhicules:', err);
+      error: err => {
+        console.error('Erreur chargement données', err);
+        this.errorMessage = 'Impossible de charger les données nécessaires.';
         this.isLoading = false;
       }
     });
   }
 
   getVilleNom(villeId: string): string {
-    return this.villes.find(v => v.id === villeId)?.nomVille || '';
+    return this.villes.find(v => String(v.id) === String(villeId))?.nomVille || 'Inconnue';
+  }
+
+  getChauffeurNom(id: number): string {
+    const c = this.chauffeurs.find(ch => ch.id === id);
+    return c ? (c.fullName || c.username) : 'Inconnu';
+  }
+
+  onFieldChange(field: keyof FormErrors): void {
+    if (this.formErrors[field]) {
+      delete this.formErrors[field];
+    }
   }
 
   submit(): void {
     this.errorMessage = '';
     this.successMessage = '';
+    this.formErrors = {};
 
-    const payload = this.buildPayload();
-    const validationError = this.validate(payload);
+    let hasError = false;
+    const v = this.trajetForm;
 
-    if (validationError) {
-      this.errorMessage = validationError;
-      return;
+    if (!v.villeDepartId) { this.formErrors.villeDepartId = 'Obligatoire'; hasError = true; }
+    if (!v.villeArriveeId) { this.formErrors.villeArriveeId = 'Obligatoire'; hasError = true; }
+    if (v.villeDepartId && v.villeDepartId === v.villeArriveeId) {
+      this.formErrors.villeArriveeId = 'Doivent être différentes'; hasError = true;
     }
+    if (!v.vehiculeId)     { this.formErrors.vehiculeId     = 'Obligatoire'; hasError = true; }
+    if (!v.distance || v.distance <= 0) { this.formErrors.distance = '> 0'; hasError = true; }
+    if (!v.dureeEstimee)   { this.formErrors.dureeEstimee   = 'Obligatoire'; hasError = true; }
+    if (!v.tarif || v.tarif <= 0)     { this.formErrors.tarif = '> 0'; hasError = true; }
+    if (!v.dateDepart)     { this.formErrors.dateDepart     = 'Obligatoire'; hasError = true; }
+    if (!v.heureDepart)    { this.formErrors.heureDepart    = 'Obligatoire'; hasError = true; }
+    if (!v.chauffeurId)    { this.formErrors.chauffeurId    = 'Obligatoire'; hasError = true; }
+
+    if (hasError) return;
 
     this.isSubmitting = true;
+
+    const statutNumeric = this.statusOptions.find(o => o.value === v.statut)?.numeric ?? StatutTrajet.PROGRAMME;
+    const payload = {
+      villeDepartId: v.villeDepartId,
+      villeArriveeId: v.villeArriveeId,
+      vehiculeId: v.vehiculeId,
+      distance: Number(v.distance),
+      dureeEstimee: v.dureeEstimee.trim(),
+      tarif: Number(v.tarif),
+      dateDepart: v.dateDepart,
+      heureDepart: v.heureDepart,
+      statut: statutNumeric,
+      chauffeurId: v.chauffeurId
+    };
 
     this.trajetService.create(payload).pipe(
       finalize(() => {
@@ -119,7 +174,7 @@ export class AjoutTrajetComponent implements OnInit {
       next: () => {
         this.successMessage = 'Trajet ajouté avec succès.';
         this.resetForm();
-        setTimeout(() => this.router.navigate(['/trajets/liste']), 600);
+        setTimeout(() => this.router.navigate(['/trajets/liste']), 800);
       },
       error: (err) => {
         if (err.status === 400) {
@@ -139,71 +194,18 @@ export class AjoutTrajetComponent implements OnInit {
     this.router.navigate(['/trajets/liste']);
   }
 
-  private buildPayload(): TrajetPayload {
-    return {
-      villeDepartId: this.trajetForm.villeDepartId.trim(),
-      villeArriveeId: this.trajetForm.villeArriveeId.trim(),
-      vehiculeId: this.trajetForm.vehiculeId.trim(),
-      distance: Number(this.trajetForm.distance),
-      dureeEstimee: this.trajetForm.dureeEstimee.trim(),
-      tarif: Number(this.trajetForm.tarif),
-      dateDepart: this.trajetForm.dateDepart,
-      heureDepart: this.trajetForm.heureDepart,
-      statut: Number(this.trajetForm.statut)
-    };
-  }
-
-  private validate(payload: TrajetPayload): string {
-    if (!payload.villeDepartId) {
-      return 'La ville de départ est obligatoire.';
-    }
-
-    if (!payload.villeArriveeId) {
-      return 'La ville d\'arrivée est obligatoire.';
-    }
-
-    if (payload.villeDepartId === payload.villeArriveeId) {
-      return 'Les villes de départ et d\'arrivée doivent être différentes.';
-    }
-
-    if (!payload.vehiculeId) {
-      return 'Le véhicule est obligatoire.';
-    }
-
-    if (!Number.isFinite(payload.distance) || payload.distance <= 0) {
-      return 'La distance doit être supérieure à 0.';
-    }
-
-    if (!payload.dureeEstimee) {
-      return 'La durée estimée est obligatoire.';
-    }
-
-    if (!Number.isFinite(payload.tarif) || payload.tarif <= 0) {
-      return 'Le tarif doit être supérieur à 0.';
-    }
-
-    if (!payload.dateDepart) {
-      return 'La date de départ est obligatoire.';
-    }
-
-    if (!payload.heureDepart) {
-      return 'L\'heure de départ est obligatoire.';
-    }
-
-    return '';
-  }
-
   private resetForm(): void {
     this.trajetForm = {
       villeDepartId: '',
       villeArriveeId: '',
       vehiculeId: '',
-      distance: 0,
+      distance: null,
       dureeEstimee: '',
-      tarif: 0,
+      tarif: null,
       dateDepart: '',
       heureDepart: '',
-      statut: StatutTrajet.PROGRAMME
+      statut: 'PROGRAMME',
+      chauffeurId: 0
     };
   }
 }
