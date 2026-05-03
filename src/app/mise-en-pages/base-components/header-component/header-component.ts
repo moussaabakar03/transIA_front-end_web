@@ -14,6 +14,8 @@ export class HeaderComponent implements OnInit {
 
   utilisateurConnecter?: LoginResponse | null;
 
+  utilisateurConnecter?: LoginResponse | null;
+
 
   constructor(
     private authService: AuthService,
