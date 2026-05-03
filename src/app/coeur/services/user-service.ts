@@ -18,7 +18,7 @@ export class UserService {
   // }
 
   // Endpoint qui renvoie tous les utilisateurs ayant le rôle de chauffeur
-  getChauffeurs(): Observable<User[]> {
+  getChauffeurs(): Observable<User[]> {4
     return this.http.get<User[]>(`${environment.backendurl}/utilisateur/chauffeurs`);
   }
 

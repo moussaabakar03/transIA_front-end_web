@@ -9,6 +9,12 @@ interface VillePayload {
   region: string;
 }
 
+interface FormErrors {
+  nomVille?: string;
+  region?: string;
+}
+
+
 @Component({
   selector: 'app-ajout-ville-component',
   standalone: false,
@@ -29,6 +35,12 @@ export class AjoutVilleComponent implements OnInit {
   isLoading: boolean = false;
   errorMessage: string = '';
   successMessage: string = '';
+
+  formErrors: FormErrors = {};
+
+  onFieldChange(field: keyof FormErrors): void {
+    if (this.formErrors[field]) delete this.formErrors[field];
+  } 
 
   constructor(
     private villeService: VilleService,

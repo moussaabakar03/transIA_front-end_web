@@ -1,156 +1,185 @@
-<div class="vehicule-form-page">
-  <div class="d-flex align-items-center justify-content-between mb-4 page-head">
-    <div>
-      <h4 class="mb-1 fw-bold">Ajouter un vehicule</h4>
-      <p class="text-muted mb-0">Renseignez les informations necessaires pour enregistrer un nouveau vehicule.</p>
+<div class="ajout-vehicule-container">
+
+  <!-- ── En-tête Transia ──────────────────────── -->
+  <div class="page-header page-header-ajout">
+    <div class="header-left">
+      <div class="page-eyebrow">TransIa · Flotte</div>
+      <h4>Ajouter un véhicule</h4>
+      <p>Renseignez les informations nécessaires pour enregistrer un nouveau véhicule</p>
     </div>
-    <button type="button" class="btn btn-soft-secondary" (click)="cancel()">
-      Retour a la liste
+    <button class="btn-transia-ghost" (click)="cancel()">
+      <i class="las la-arrow-left me-1"></i> Retour à la liste
     </button>
   </div>
 
-  <div class="row g-4">
-    <div class="col-lg-8">
-      <div class="card form-card">
-        <div class="card-body">
-          <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
-            {{ errorMessage }}
+  <!-- ── Formulaire + Aperçu ───────────────────── -->
+  <div class="form-with-preview form-ajout-layout">
+    <!-- Colonne formulaire -->
+    <div class="form-column">
+      <div class="table-card">
+        <div class="card-body p-4">
+
+          <!-- Alertes -->
+          <div *ngIf="errorMessage" class="alert-transia alert-error mb-4">
+            <i class="las la-exclamation-circle"></i> {{ errorMessage }}
+          </div>
+          <div *ngIf="successMessage" class="alert-transia alert-success mb-4">
+            <i class="las la-check-circle"></i> {{ successMessage }}
           </div>
 
-          <div *ngIf="successMessage" class="alert alert-success" role="alert">
-            {{ successMessage }}
-          </div>
-
-          <form novalidate>
+          <!-- Section Identification -->
+          <div class="form-section">
+            <div class="form-section-title">Identification du véhicule</div>
             <div class="row g-3">
               <div class="col-md-6">
-                <label class="form-label" for="marque">Marque</label>
-                <input
-                  id="marque"
-                  name="marque"
-                  type="text"
-                  class="form-control"
-                  [(ngModel)]="vehiculeForm.marque"
-                  [disabled]="isSubmitting"
-                  placeholder="Ex: Toyota"
-                />
+                <div class="form-field">
+                  <label>Marque <span class="required">*</span></label>
+                  <div class="input-wrap">
+                    <i class="las la-tag input-icon"></i>
+                    <input type="text" class="form-control"
+                           [(ngModel)]="vehiculeForm.marque"
+                           [disabled]="isSubmitting"
+                           placeholder="Ex : Toyota" />
+                  </div>
+                  <span *ngIf="formErrors.marque" class="field-error-msg">
+                    <i class="las la-exclamation-circle"></i> {{ formErrors.marque }}
+                  </span>
+                </div>
               </div>
-
               <div class="col-md-6">
-                <label class="form-label" for="modele">Modele</label>
-                <input
-                  id="modele"
-                  name="modele"
-                  type="text"
-                  class="form-control"
-                  [(ngModel)]="vehiculeForm.modele"
-                  [disabled]="isSubmitting"
-                  placeholder="Ex: Hiace"
-                />
+                <div class="form-field">
+                  <label>Modèle <span class="required">*</span></label>
+                  <div class="input-wrap">
+                    <i class="las la-car input-icon"></i>
+                    <input type="text" class="form-control"
+                           [(ngModel)]="vehiculeForm.modele"
+                           [disabled]="isSubmitting"
+                           placeholder="Ex : Hiace" />
+                  </div>
+                  <span *ngIf="formErrors.modele" class="field-error-msg">
+                    <i class="las la-exclamation-circle"></i> {{ formErrors.modele }}
+                  </span>
+                </div>
               </div>
-
               <div class="col-md-6">
-                <label class="form-label" for="immatriculation">Immatriculation</label>
-                <input
-                  id="immatriculation"
-                  name="immatriculation"
-                  type="text"
-                  class="form-control"
-                  [(ngModel)]="vehiculeForm.immatriculation"
-                  [disabled]="isSubmitting"
-                  placeholder="Ex: LT-245-AB"
-                />
+                <div class="form-field">
+                  <label>Immatriculation <span class="required">*</span></label>
+                  <div class="input-wrap">
+                    <i class="las la-id-card input-icon"></i>
+                    <input type="text" class="form-control immat-input"
+                           [(ngModel)]="vehiculeForm.immatriculation"
+                           [disabled]="isSubmitting"
+                           placeholder="Ex : TG-1234-AB" />
+                  </div>
+                  <span *ngIf="formErrors.immatriculation" class="field-error-msg">
+                    <i class="las la-exclamation-circle"></i> {{ formErrors.immatriculation }}
+                  </span>
+                </div>
               </div>
-
               <div class="col-md-6">
-                <label class="form-label" for="capacite">Capacite</label>
-                <input
-                  id="capacite"
-                  name="capacite"
-                  type="number"
-                  min="1"
-                  class="form-control"
-                  [(ngModel)]="vehiculeForm.capacite"
-                  [disabled]="isSubmitting"
-                  placeholder="Ex: 14"
-                />
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label" for="status">Statut</label>
-                <select
-                  id="status"
-                  name="status"
-                  class="form-select"
-                  [(ngModel)]="vehiculeForm.statut"
-                  [disabled]="isSubmitting"
-                >
-                  <option *ngFor="let option of statusOptions" [ngValue]="option.value">
-                    {{ option.label }}
-                  </option>
-                </select>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label" for="image">Image URL</label>
-                <input
-                  id="image"
-                  name="image"
-                  type="url"
-                  class="form-control"
-                  [(ngModel)]="vehiculeForm.image"
-                  [disabled]="isSubmitting"
-                  placeholder="https://..."
-                />
+                <div class="form-field">
+                  <label>Capacité (places) <span class="required">*</span></label>
+                  <div class="input-wrap">
+                    <i class="las la-users input-icon"></i>
+                    <input type="number" min="1" class="form-control"
+                           [(ngModel)]="vehiculeForm.capacite"
+                           [disabled]="isSubmitting"
+                           placeholder="Ex : 14" />
+                  </div>
+                  <span *ngIf="formErrors.capacite" class="field-error-msg">
+                    <i class="las la-exclamation-circle"></i> {{ formErrors.capacite }}
+                  </span>
+                </div>
               </div>
             </div>
+          </div>
 
-            <div class="form-actions mt-4">
-              <button type="button" class="btn btn-light" (click)="cancel()" [disabled]="isSubmitting">
-                Annuler
-              </button>
-              <button type="button" class="btn btn-primary" (click)="submit()" [disabled]="isSubmitting">
-                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                {{ isSubmitting ? 'Enregistrement...' : 'Enregistrer le vehicule' }}
-              </button>
+          <!-- Section Configuration -->
+          <div class="form-section">
+            <div class="form-section-title">Configuration</div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-field">
+                  <label>Statut</label>
+                  <div class="input-wrap">
+                    <i class="las la-toggle-on input-icon"></i>
+                    <select class="form-select" [(ngModel)]="vehiculeForm.statut" [disabled]="isSubmitting">
+                      <option *ngFor="let option of statusOptions" [ngValue]="option.value">
+                        {{ option.label }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-field">
+                  <label>Image URL <span class="optional">(optionnel)</span></label>
+                  <div class="input-wrap">
+                    <i class="las la-image input-icon"></i>
+                    <input type="url" class="form-control"
+                           [(ngModel)]="vehiculeForm.image"
+                           [disabled]="isSubmitting"
+                           placeholder="https://..." />
+                  </div>
+                </div>
+              </div>
             </div>
-          </form>
+          </div>
+
+          <!-- Actions -->
+          <div class="d-flex justify-content-end gap-3 mt-4">
+            <button type="button" class="btn-transia-ghost" (click)="cancel()" [disabled]="isSubmitting">
+              Annuler
+            </button>
+            <button type="button" class="btn-transia-primary" (click)="submit()" [disabled]="isSubmitting">
+              <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+              <i *ngIf="!isSubmitting" class="las la-save me-1"></i>
+              {{ isSubmitting ? 'Enregistrement...' : 'Enregistrer le véhicule' }}
+            </button>
+          </div>
+
         </div>
       </div>
     </div>
 
-    <div class="col-lg-4">
-      <div class="card helper-card">
-        <div class="card-body">
-          <h5 class="card-title mb-3">Apercu</h5>
-          <div class="preview-box mb-3">
-            <img
-              *ngIf="vehiculeForm.image; else defaultPreview"
-              [src]="vehiculeForm.image"
-              [alt]="vehiculeForm.marque || 'Vehicule'"
-              class="preview-image"
-            />
-            <ng-template #defaultPreview>
-              <div class="preview-placeholder">
-                <i class="las la-car-side"></i>
-              </div>
-            </ng-template>
+    <!-- Colonne aperçu -->
+    <div class="preview-column">
+      <div class="preview-card">
+        <div class="preview-img-area">
+          <img *ngIf="vehiculeForm.image; else defaultPreview"
+               [src]="vehiculeForm.image"
+               [alt]="vehiculeForm.marque"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
+          <ng-template #defaultPreview>
+            <div class="preview-img-fallback">
+              <i class="las la-bus"></i>
+            </div>
+          </ng-template>
+        </div>
+        <div class="preview-body">
+          <div class="preview-eyebrow">Aperçu en direct</div>
+          <div class="preview-vehicle-name">
+            {{ (vehiculeForm.marque || 'Marque') + ' ' + (vehiculeForm.modele || 'Modèle') }}
           </div>
-
+          <div class="preview-immat">
+            {{ vehiculeForm.immatriculation || 'TG-XXX-XX' }}
+          </div>
           <div class="preview-meta">
-            <h6 class="mb-1">
-              {{ vehiculeForm.marque || 'Marque' }} {{ vehiculeForm.modele || 'Modele' }}
-            </h6>
-            <p class="text-muted mb-2">
-              {{ vehiculeForm.immatriculation || 'Immatriculation' }}
-            </p>
-            <div class="d-flex justify-content-between small text-muted">
-              <span>Capacite</span>
-              <span>{{ vehiculeForm.capacite || 0 }} places</span>
+            <div class="preview-meta-row">
+              <span class="preview-meta-label"><i class="las la-users"></i> Capacité</span>
+              <span class="preview-meta-value">{{ vehiculeForm.capacite || 0 }} places</span>
+            </div>
+            <div class="preview-meta-row">
+              <span class="preview-meta-label"><i class="las la-toggle-on"></i> Statut</span>
+              <span class="statut-badge"
+                   >
+                {{ vehiculeForm.statut || '—' }}
+              </span>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
 </div>
