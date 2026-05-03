@@ -47,7 +47,7 @@ enum ModalMode {
   selector: 'app-liste-trajet-compent',
   standalone: false,
   templateUrl: './liste-trajet-compent.html',
-  styleUrls: ['./liste-trajet-compent.scss']
+  styleUrl: './liste-trajet-compent.scss'
 })
 export class ListeTrajetCompent implements OnInit {
 
@@ -121,6 +121,8 @@ export class ListeTrajetCompent implements OnInit {
         console.error('Erreur chargement données:', err);
         this.errorMessage = 'Impossible de charger les trajets.';
         this.isLoading = false;
+        this.cd.detectChanges();
+
       }
     });
   }
@@ -191,6 +193,7 @@ export class ListeTrajetCompent implements OnInit {
     this.editingTrajetId = id;
     this.modalMode = ModalMode.VISUALISATION;
     this.trajetForm = this.trajetToForm(t);
+        this.cd.detectChanges();
 
     // Charger les réservations du trajet
     this.loadingReservations = true;

@@ -55,6 +55,13 @@ export class ListeReservationComponent implements OnInit {
   trajets: Trajet[] = [];
   users: User[] = [];
 
+  // Plan de sièges
+  siegesOccupes: string[] = [];
+  siegesSelectionnes: string[] = [];
+  capaciteVehicule: number = 0;
+  siegesDisponibles: number[] = [];   
+
+
   isLoading    = true;
   errorMessage = '';
   searchTerm   = '';
@@ -141,6 +148,48 @@ export class ListeReservationComponent implements OnInit {
         trajet?.villeArrivee?.nomVille?.toLowerCase().includes(term) ||
         r.nomResponsable?.toLowerCase().includes(term);
     });
+  }
+
+  // Méthode appelée quand le trajet change
+ // Méthode appelée quand le trajet change (à brancher sur le select)
+onTrajetChange(): void {
+  this.siegesSelectionnes = [];
+  this.siegesOccupes = [];
+  this.siegesDisponibles = [];
+  if (this.form.trajetId) {
+    const trajet = this.trajets.find(t => t.id === this.form.trajetId);
+    if (trajet && trajet.vehicule) {
+      // Générer le tableau des sièges de 1 à la capacité du véhicule
+      this.siegesDisponibles = Array.from({ length: trajet.vehicule.capacite }, (_, i) => i + 1);
+    }
+    // Charger les sièges déjà occupés pour ce trajet
+    this.reservationService.getOccupiedSeats(this.form.trajetId).subscribe({
+      next: (sieges) => this.siegesOccupes = sieges,
+      error: () => this.siegesOccupes = []
+    });
+  }
+}
+
+  // Méthode pour convertir un numéro de siège en chaîne (pour les comparaisons)
+  siegeToString(num: number): string {
+    return String(num);
+  }
+
+  // Sélection / désélection d'un siège
+  toggleSiege(siegeNum: number): void {
+    const siegeStr = this.siegeToString(siegeNum);
+    if (this.siegesOccupes.includes(siegeStr)) return; // occupé
+
+    const index = this.siegesSelectionnes.indexOf(siegeStr);
+    if (index >= 0) {
+      this.siegesSelectionnes.splice(index, 1);
+    } else {
+      if (this.siegesSelectionnes.length >= this.form.nombrePlace) {
+        // Optionnel : afficher un message ou empêcher
+        return;
+      }
+      this.siegesSelectionnes.push(siegeStr);
+    }
   }
 
   // ── Helpers ──────────────────────────────────────────
@@ -297,7 +346,8 @@ export class ListeReservationComponent implements OnInit {
       reservationId:  { id: this.reservationEnCours?.id || '' },
       montantVerse:   this.paiementForm.montantVerse!,
       reference:      this.paiementForm.reference.trim() || this.genererReference(),
-      modePaiement:   this.paiementForm.modePaiement as ModePaiement
+      modePaiement:   this.paiementForm.modePaiement as ModePaiement,
+
     };
 
     this.paiementService.payer(payload).subscribe({
@@ -403,7 +453,8 @@ export class ListeReservationComponent implements OnInit {
       userId: this.form.userId, trajetId: this.form.trajetId,
       nombrePlace: this.form.nombrePlace,
       nomResponsable: this.form.nomResponsable.trim(),
-      nomsPassagers, typeReservation: TypeReservation.PRESENTIEL
+      nomsPassagers, typeReservation: TypeReservation.PRESENTIEL,
+      siegesChoisis: this.siegesSelectionnes.length > 0 ? this.siegesSelectionnes : undefined
     };
 
     if (this.modalMode === ModalMode.AJOUT) {

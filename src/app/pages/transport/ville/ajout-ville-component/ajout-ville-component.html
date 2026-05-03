@@ -1,122 +1,125 @@
-<div class="ville-form-page">
-  <div class="d-flex align-items-center justify-content-between mb-4 page-head">
-    <div>
-      <h4 class="mb-1 fw-bold">Ajouter une ville</h4>
-      <p class="text-muted mb-0">Renseignez les informations nécessaires pour enregistrer une nouvelle ville.</p>
+<div class="ajout-ville-container">
+
+  <!-- ── En-tête Transia ──────────────────────── -->
+  <div class="page-header page-header-ajout">
+    <div class="header-left">
+      <div class="page-eyebrow">TransIa · Territoire</div>
+      <h4>Ajouter une ville</h4>
+      <p>Renseignez les informations nécessaires pour enregistrer une nouvelle ville</p>
     </div>
-    <button type="button" class="btn btn-soft-secondary" (click)="cancel()">
-      Retour à la liste
+    <button class="btn-transia-ghost" (click)="cancel()">
+      <i class="las la-arrow-left me-1"></i> Retour à la liste
     </button>
   </div>
 
-  <!-- Chargement -->
-  <div *ngIf="isLoading" class="text-center py-5">
-    <div class="spinner-border text-primary" role="status"></div>
-    <p class="mt-3 text-muted">Chargement des données...</p>
-  </div>
+  <!-- ── Formulaire + Aperçu ───────────────────── -->
+  <div class="form-with-preview form-ajout-layout">
 
-  <div *ngIf="!isLoading" class="row g-4">
-    <div class="col-lg-8">
-      <div class="card form-card">
-        <div class="card-body">
-          <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
-            {{ errorMessage }}
+    <!-- Colonne formulaire -->
+    <div class="form-column">
+      <div class="table-card">
+        <div class="card-body p-4">
+
+          <!-- Alertes -->
+          <div *ngIf="errorMessage" class="alert-transia alert-error mb-4">
+            <i class="las la-exclamation-circle"></i> {{ errorMessage }}
+          </div>
+          <div *ngIf="successMessage" class="alert-transia alert-success mb-4">
+            <i class="las la-check-circle"></i> {{ successMessage }}
           </div>
 
-          <div *ngIf="successMessage" class="alert alert-success" role="alert">
-            {{ successMessage }}
+          <!-- Chargement -->
+          <div *ngIf="isLoading" class="loading-state" style="padding:2rem">
+            <div class="spinner-ring"></div>
+            <p>Chargement des données...</p>
           </div>
 
-          <form novalidate>
+          <!-- Section Détails -->
+          <div *ngIf="!isLoading" class="form-section">
+            <div class="form-section-title">Détails de la ville</div>
             <div class="row g-3">
-
-              <!-- Nom de la ville -->
-              <div class="col-md-12">
-                <label class="form-label" for="nomVille">Nom de la ville</label>
-                <input
-                  id="nomVille"
-                  name="nomVille"
-                  type="text"
-                  class="form-control"
-                  [(ngModel)]="villeForm.nomVille"
-                  [disabled]="isSubmitting"
-                  placeholder="Ex: Dakar"
-                />
+              <div class="col-12">
+                <div class="form-field">
+                  <label>Nom de la ville <span class="required">*</span></label>
+                  <div class="input-wrap">
+                    <i class="las la-city input-icon"></i>
+                    <input type="text" class="form-control"
+                           [(ngModel)]="villeForm.nomVille"
+                           [disabled]="isSubmitting"
+                           (ngModelChange)="onFieldChange('nomVille')"
+                           placeholder="Ex : Dakar" />
+                  </div>
+                  <span *ngIf="formErrors.nomVille" class="field-error-msg">
+                    <i class="las la-exclamation-circle"></i> {{ formErrors.nomVille }}
+                  </span>
+                </div>
               </div>
-
-              <!-- Région -->
-              <div class="col-md-12">
-                <label class="form-label" for="region">Région</label>
-                <select
-                  id="region"
-                  name="region"
-                  class="form-select"
-                  [(ngModel)]="villeForm.region"
-                  [disabled]="isSubmitting"
-                >
-                  <option value="">-- Sélectionner une région --</option>
-                  <option *ngFor="let region of regionOptions" [value]="region">
-                    {{ region }}
-                  </option>
-                </select>
+              <div class="col-12">
+                <div class="form-field">
+                  <label>Région</label>
+                  <div class="input-wrap">
+                    <i class="las la-globe-africa input-icon"></i>
+                    <select class="form-select"
+                            [(ngModel)]="villeForm.region"
+                            [disabled]="isSubmitting"
+                            (ngModelChange)="onFieldChange('region')">
+                      <option value="">— Sélectionner une région —</option>
+                      <option *ngFor="let region of regionOptions" [value]="region">
+                        {{ region }}
+                      </option>
+                    </select>
+                  </div>
+                  <span *ngIf="formErrors.region" class="field-error-msg">
+                    <i class="las la-exclamation-circle"></i> {{ formErrors.region }}
+                  </span>
+                </div>
               </div>
-
             </div>
-          </form>
+          </div>
+
+          <!-- Actions (si pas en chargement) -->
+          <div *ngIf="!isLoading" class="d-flex justify-content-end gap-3 mt-4">
+            <button type="button" class="btn-transia-ghost" (click)="cancel()" [disabled]="isSubmitting">
+              Annuler
+            </button>
+            <button type="button" class="btn-transia-primary" (click)="submit()" [disabled]="isSubmitting">
+              <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+              <i *ngIf="!isSubmitting" class="las la-save me-1"></i>
+              {{ isSubmitting ? 'Enregistrement...' : 'Enregistrer la ville' }}
+            </button>
+          </div>
+
         </div>
       </div>
     </div>
 
-    <!-- Colonne droite : aperçu -->
-    <div class="col-lg-4">
-      <div class="card form-card">
-        <div class="card-body">
-          <p class="text-muted text-sm mb-3">
-            <i class="las la-info-circle me-2"></i>Aperçu en direct
-          </p>
-          <div class="preview-box">
-            <div class="preview-item">
-              <div class="preview-icon">
-                <i class="las la-map-marked-alt"></i>
-              </div>
-              <div class="preview-content">
-                <div class="preview-label">Ville</div>
-                <div class="preview-value">
-                  {{ villeForm.nomVille || 'Nom de la ville' }}
-                </div>
-              </div>
-            </div>
-            <div class="preview-item mt-3">
-              <div class="preview-icon">
-                <i class="las la-globe-africa"></i>
-              </div>
-              <div class="preview-content">
-                <div class="preview-label">Région</div>
-                <div class="preview-value">
-                  {{ villeForm.region || 'Région' }}
-                </div>
-              </div>
+    <!-- Colonne aperçu -->
+    <div class="preview-column" *ngIf="!isLoading">
+      <div class="preview-card">
+        <div class="preview-img-area">
+          <div class="preview-img-fallback">
+            <i class="las la-map-marked-alt"></i>
+          </div>
+        </div>
+        <div class="preview-body">
+          <div class="preview-eyebrow">Aperçu en direct</div>
+          <div class="preview-vehicle-name">
+            {{ villeForm.nomVille || 'Nom de la ville' }}
+          </div>
+          <div class="preview-immat">
+            <i class="las la-globe-africa me-1"></i>
+            {{ villeForm.region || 'Région' }}
+          </div>
+          <div class="preview-meta">
+            <div class="preview-meta-row">
+              <span class="preview-meta-label">Statut</span>
+              <span class="statut-badge statut-actif">Actif</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Boutons d'action -->
-  <div class="row g-4 mt-4">
-    <div class="col-lg-8">
-      <div class="d-flex gap-2 justify-content-end">
-        <button type="button" class="btn btn-light" (click)="cancel()">
-          Annuler
-        </button>
-        <button type="button" class="btn btn-primary" (click)="submit()" [disabled]="isSubmitting">
-          <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status"></span>
-          <i *ngIf="!isSubmitting" class="las la-save me-1"></i>
-          {{ isSubmitting ? 'Enregistrement...' : 'Enregistrer' }}
-        </button>
-      </div>
-    </div>
   </div>
 
 </div>

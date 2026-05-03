@@ -1,0 +1,37 @@
+// src/styles.scss  ← fichier GLOBAL de ton projet Angular
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@0,300;0,400;0,500;0,600&display=swap');
+
+:root {
+  --blue-600: #1d4ed8;
+  --blue-500: #3b82f6;
+  --blue-400: #60a5fa;
+  --blue-100: #dbeafe;
+  --emerald:  #10b981;
+  --amber:    #f59e0b;
+  --rose:     #f43f5e;
+  --slate-50: #f8fafc;
+  --slate-100:#f1f5f9;
+  --slate-200:#e2e8f0;
+  --slate-300:#cbd5e1;
+  --slate-400:#94a3b8;
+  --slate-500:#64748b;
+  --slate-600:#475569;
+  --slate-700:#334155;
+  --slate-800:#1e293b;
+  --white: #ffffff;
+
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+
+  --radius-sm:  6px;
+  --radius-md:  12px;
+  --radius-lg:  18px;
+  --radius-xl:  24px;
+
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.06);
+  --shadow-md:  0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg:  0 10px 40px rgba(0,0,0,.12);
+  --shadow-blue: 0 4px 20px rgba(59,130,246,.25);
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}

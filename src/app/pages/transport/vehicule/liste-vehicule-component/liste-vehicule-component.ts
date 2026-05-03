@@ -160,13 +160,13 @@ export class ListeVehiculeComponent implements OnInit {
       modele: vehicule.modele,
       immatriculation: vehicule.immatriculation,
       capacite: vehicule.capacite,
-      statut: vehicule.statut.toString(), // Utiliser la valeur numérique directement
+      statut: String(vehicule.statut), // Utiliser la valeur numérique directement
       image: vehicule.image || ''
     };
     
     this.vehiculeService.update(id,{
       marque: this.vehiculeForm.marque.trim(),
-      modele: this.vehiculeForm.modele.trim(),
+      modele: this.vehiculeForm.modele,
       immatriculation: this.vehiculeForm.immatriculation.trim().toUpperCase(),
       capacite: Number(this.vehiculeForm.capacite),
       statut: Number(this.vehiculeForm.statut), // Envoyer la valeur numérique
@@ -362,6 +362,7 @@ export class ListeVehiculeComponent implements OnInit {
       }
     }
   }
+  
 
   // ── Helpers ───────────────────────────────────────────────
   private emptyForm(): VehiculeForm {

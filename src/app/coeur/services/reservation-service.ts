@@ -39,5 +39,8 @@ export class ReservationService {
     return this.http.get<Reservation[]>(`${this.baseUrl}/trajet/${trajetId}/liste`);
   }
 
+  getOccupiedSeats(trajetId: string): Observable<string[]> {
+    return this.http.get<string[]>(`${this.baseUrl}/trajet/${trajetId}/sieges-occupes`);
+  }
   
 }
