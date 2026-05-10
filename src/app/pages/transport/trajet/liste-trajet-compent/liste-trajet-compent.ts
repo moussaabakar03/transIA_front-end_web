@@ -11,6 +11,10 @@ import { User } from '../../../../partages/models/users';
 import { Reservation } from '../../../../partages/models/reservation.model';
 import { ReservationService } from '../../../../coeur/services/reservation-service';
 
+
+import { Pipe, PipeTransform } from '@angular/core';
+
+
 interface TrajetForm {
   villeDepartId: string;
   villeArriveeId: string;
@@ -84,6 +88,8 @@ export class ListeTrajetCompent implements OnInit {
     { value: 'TERMINE',    label: 'Terminé',    numeric: StatutTrajet.TERMINE },
     { value: 'ANNULE',     label: 'Annulé',     numeric: StatutTrajet.ANNULE },
   ];
+
+  totalPlaces = (acc: number, r: Reservation) => acc + (r.nombrePlace || 0);
 
   constructor(
     private trajetService: TrajetService,
@@ -377,5 +383,24 @@ export class ListeTrajetCompent implements OnInit {
 
   onFieldChange(field: keyof FormErrors): void {
     if (this.formErrors[field]) delete this.formErrors[field];
+  }
+
+
+}
+
+
+
+@Pipe({ name: 'resStatutCount' })
+export class ResStatutCountPipe implements PipeTransform {
+  transform(reservations: Reservation[], statut: string): number {
+    return reservations.filter(r => r.statut === statut).length;
+  }
+}
+
+// res-total-places.pipe.ts
+@Pipe({ name: 'resTotalPlaces' })
+export class ResTotalPlacesPipe implements PipeTransform {
+  transform(reservations: Reservation[]): number {
+    return reservations.reduce((sum, r) => sum + (r.nombrePlace || 0), 0);
   }
 }

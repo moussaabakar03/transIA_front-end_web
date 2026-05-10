@@ -188,6 +188,217 @@
   }
 }
 
+
+// ── Réservations liées (visualisation trajet) ──────────────
+
+.res-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  color: var(--slate-400, #94a3b8);
+  font-size: .85rem;
+}
+
+// ── Stats row ──
+.res-stats-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.res-stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 40px;
+  font-size: .78rem;
+  font-weight: 600;
+  border: 1.5px solid transparent;
+
+  i { font-size: 1rem; }
+
+  .res-stat-val { font-size: 1.05rem; font-weight: 700; }
+  .res-stat-lbl { font-weight: 500; opacity: .75; }
+
+  &.res-stat-total     { background: #f1f5f9; border-color: #e2e8f0; color: #334155; }
+  &.res-stat-confirmee { background: #ecfdf5; border-color: #6ee7b7; color: #065f46; }
+  &.res-stat-attente   { background: #fffbeb; border-color: #fcd34d; color: #92400e; }
+  &.res-stat-annulee   { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+  &.res-stat-places    { background: #eff6ff; border-color: #93c5fd; color: #1e3a8a; }
+}
+
+// ── Empty state ──
+.res-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1.5px dashed #e2e8f0;
+}
+.res-empty-icon {
+  width: 52px; height: 52px;
+  background: #f1f5f9;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 12px;
+  i { font-size: 1.6rem; color: #94a3b8; }
+}
+.res-empty-title { font-weight: 600; color: #475569; margin: 0 0 4px; }
+.res-empty-sub   { font-size: .82rem; color: #94a3b8; margin: 0; }
+
+// ── Cards ──
+.res-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.res-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow .18s, transform .18s;
+
+  &:hover { box-shadow: 0 4px 18px rgba(0,0,0,.07); transform: translateY(-1px); }
+
+  &--confirmee { border-left-color: #10b981; }
+  &--attente   { border-left-color: #f59e0b; }
+  &--annulee   { border-left-color: #ef4444; opacity: .75; }
+}
+
+.res-card-stripe {
+  width: 5px;
+  align-self: stretch;
+  flex-shrink: 0;
+  background: #e2e8f0;
+
+  .res-card--confirmee & { background: #10b981; }
+  .res-card--attente &   { background: #f59e0b; }
+  .res-card--annulee &   { background: #ef4444; }
+}
+
+.res-card-num {
+  width: 32px;
+  text-align: center;
+  font-size: .72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.res-card-body { flex: 1; padding: 11px 12px; }
+
+.res-card-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+// Avatar
+.res-card-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .85rem; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.res-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.res-card-name {
+  font-weight: 600;
+  font-size: .88rem;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.res-card-date {
+  font-size: .73rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  i { font-size: .8rem; }
+}
+
+// Places
+.res-card-places {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 5px 10px;
+  flex-shrink: 0;
+  color: #1d4ed8;
+  i { font-size: 1rem; }
+}
+.res-card-places-val { font-weight: 700; font-size: .95rem; }
+.res-card-places-lbl { font-size: .72rem; color: #3b82f6; }
+
+// Statut
+.res-card-statut {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.res-statut-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  &.dot-confirmee { background: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.15); }
+  &.dot-attente   { background: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.15); }
+  &.dot-annulee   { background: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68,.15); }
+}
+.res-statut-label {
+  font-size: .76rem; font-weight: 600;
+  &.label-confirmee { color: #065f46; }
+  &.label-attente   { color: #92400e; }
+  &.label-annulee   { color: #991b1b; }
+}
+
+// Type
+.res-card-type {
+  font-size: .75rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #f8fafc;
+  padding: 4px 9px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+  i { font-size: .85rem; }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 .search-input-wrap {
   position: relative;
 
