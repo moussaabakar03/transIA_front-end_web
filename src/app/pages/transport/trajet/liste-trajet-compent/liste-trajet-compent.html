@@ -375,56 +375,128 @@
           </div>
         </div>
 
-        <!-- Sous-tableau réservations -->
+        <!-- Réservations liées — redesign -->
         <div class="form-section">
           <div class="form-section-title">Réservations liées</div>
-          <div class="sub-table-wrap">
-            <div class="sub-table-header">
-              <h6>
+
+          <!-- ── Chargement ── -->
+          <div *ngIf="loadingReservations" class="res-loading">
+            <div class="spinner-ring" style="margin:0 auto 8px"></div>
+            <span>Chargement des réservations…</span>
+          </div>
+
+          <!-- ── Contenu ── -->
+          <div *ngIf="!loadingReservations">
+
+            <!-- Stats rapides -->
+            <div class="res-stats-row" *ngIf="reservationsTrajet.length > 0">
+              <div class="res-stat-pill res-stat-total">
                 <i class="las la-ticket-alt"></i>
-                Réservations de ce trajet
-              </h6>
-              <span class="status-badge status-programme" *ngIf="!loadingReservations">
-                {{ reservationsTrajet.length }} réservation(s)
-              </span>
+                <span class="res-stat-val">{{ reservationsTrajet.length }}</span>
+                <span class="res-stat-lbl">Total</span>
+              </div>
+              <div class="res-stat-pill res-stat-confirmee">
+                <i class="las la-check-circle"></i>
+                <span class="res-stat-val">
+                  {{ reservationsTrajet.filter(r => r.statut === 'CONFIRMEE').length }}
+                </span>
+                <span class="res-stat-lbl">Confirmées</span>
+              </div>
+              <div class="res-stat-pill res-stat-attente">
+                <i class="las la-clock"></i>
+                <span class="res-stat-val">
+                  {{ reservationsTrajet.filter(r => r.statut === 'EN_ATTENTE').length }}
+                </span>
+                <span class="res-stat-lbl">En attente</span>
+              </div>
+              <div class="res-stat-pill res-stat-annulee">
+                <i class="las la-ban"></i>
+                <span class="res-stat-val">
+                  {{ reservationsTrajet.filter(r => r.statut === 'ANNULEE').length }}
+                </span>
+                <span class="res-stat-lbl">Annulées</span>
+              </div>
+              <div class="res-stat-pill res-stat-places">
+                <i class="las la-chair"></i>
+                <span class="res-stat-val">
+                  {{ reservationsTrajet.reduce(totalPlaces, 0) }}
+                </span>
+                <span class="res-stat-lbl">Places rés.</span>
+              </div>
             </div>
 
-            <div *ngIf="loadingReservations" style="text-align:center;padding:1.5rem">
-              <div class="spinner-ring" style="margin:0 auto"></div>
+            <!-- Empty state -->
+            <div *ngIf="reservationsTrajet.length === 0" class="res-empty">
+              <div class="res-empty-icon">
+                <i class="las la-ticket-alt"></i>
+              </div>
+              <p class="res-empty-title">Aucune réservation</p>
+              <p class="res-empty-sub">Ce trajet n'a pas encore de réservations enregistrées.</p>
             </div>
 
-            <div *ngIf="!loadingReservations && reservationsTrajet.length === 0"
-                 style="padding:1.5rem;text-align:center;color:var(--slate-400);font-size:.85rem">
-              <i class="las la-inbox" style="font-size:1.5rem;display:block;margin-bottom:6px"></i>
-              Aucune réservation pour ce trajet.
+            <!-- ── Cartes réservations ── -->
+            <div class="res-cards-list" *ngIf="reservationsTrajet.length > 0">
+              <div class="res-card" *ngFor="let res of reservationsTrajet; let i = index"
+                  [class.res-card--confirmee]="res.statut === 'CONFIRMEE'"
+                  [class.res-card--attente]="res.statut === 'EN_ATTENTE'"
+                  [class.res-card--annulee]="res.statut === 'ANNULEE'">
+
+                <!-- Indicateur coloré gauche -->
+                <div class="res-card-stripe"></div>
+
+                <!-- Numéro -->
+                <div class="res-card-num">{{ i + 1 }}</div>
+
+                <!-- Bloc principal -->
+                <div class="res-card-body">
+                  <div class="res-card-row">
+                    <!-- Responsable -->
+                    <div class="res-card-avatar">
+                      {{ (res.nomResponsable || '?').charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="res-card-info">
+                      <span class="res-card-name">{{ res.nomResponsable || '— Anonyme —' }}</span>
+                      <span class="res-card-date">
+                        <i class="las la-calendar-check"></i>
+                        {{ res.dateReservation | date:'dd MMM yyyy · HH:mm' }}
+                      </span>
+                    </div>
+
+                    <!-- Places -->
+                    <div class="res-card-places">
+                      <i class="las la-chair"></i>
+                      <span class="res-card-places-val">{{ res.nombrePlace }}</span>
+                      <span class="res-card-places-lbl">place{{ res.nombrePlace > 1 ? 's' : '' }}</span>
+                    </div>
+
+                    <!-- Statut -->
+                    <div class="res-card-statut">
+                      <span class="res-statut-dot"
+                            [class.dot-confirmee]="res.statut === 'CONFIRMEE'"
+                            [class.dot-attente]="res.statut === 'EN_ATTENTE'"
+                            [class.dot-annulee]="res.statut === 'ANNULEE'">
+                      </span>
+                      <span class="res-statut-label"
+                            [class.label-confirmee]="res.statut === 'CONFIRMEE'"
+                            [class.label-attente]="res.statut === 'EN_ATTENTE'"
+                            [class.label-annulee]="res.statut === 'ANNULEE'">
+                        {{ res.statut === 'CONFIRMEE' ? 'Confirmée'
+                        : res.statut === 'EN_ATTENTE' ? 'En attente'
+                        : res.statut === 'ANNULEE' ? 'Annulée' : res.statut }}
+                      </span>
+                    </div>
+
+                    <!-- Type -->
+                    <div class="res-card-type">
+                      <i class="las" [class.la-desktop]="res.typeReservation === 0"
+                                    [class.la-store]="res.typeReservation !== 0"></i>
+                      {{ res.typeReservation === 0 ? 'En ligne' : 'Guichet' }}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <table *ngIf="!loadingReservations && reservationsTrajet.length > 0">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Places</th>
-                  <th>Responsable</th>
-                  <th>Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let res of reservationsTrajet">
-                  <td>{{ res.dateReservation | date:'dd/MM/yy HH:mm' }}</td>
-                  <td>{{ res.nombrePlace }}</td>
-                  <td>{{ res.nomResponsable || '—' }}</td>
-                  <td>
-                    <span class="status-badge"
-                          [class.status-programme]="res.statut === 'EN_ATTENTE'"
-                          [class.status-en_cours]="res.statut === 'CONFIRMEE'"
-
-                          [class.status-annule]="res.statut === 'ANNULEE'">
-                      {{ res.statut }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
 

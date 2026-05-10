@@ -152,6 +152,27 @@
 
             <!-- Actions -->
             <td style="text-align:right">
+              <!-- <div style="display:flex;justify-content:flex-end;gap:6px">
+                <button class="action-btn btn-view" title="Voir"
+                        (click)="onView(res.id!)">
+                  <i class="las la-eye"></i>
+                </button>
+                <button class="action-btn btn-edit" title="Modifier"
+                        (click)="onEdit(res.id!)"
+                        [disabled]="res.statut !== 'EN_ATTENTE'">
+                  <i class="las la-pen"></i>
+                </button>
+                <button class="action-btn btn-payer" title="Encaisser"
+                        (click)="onPayer(res.id!)">
+                  <i class="las la-cash-register"></i>
+                </button>
+                <button class="action-btn btn-delete" title="Annuler"
+                        (click)="onAnnuler(res.id!)"
+                        [disabled]="res.statut !== 'EN_ATTENTE' && res.statut !== 'CONFIRMEE'">
+                  <i class="las la-ban"></i>
+                </button>
+              </div> -->
+            
               <div style="display:flex;justify-content:flex-end;gap:6px">
                 <button class="action-btn btn-view" title="Voir"
                         (click)="onView(res.id!)">
@@ -166,6 +187,14 @@
                         (click)="onPayer(res.id!)">
                   <i class="las la-cash-register"></i>
                 </button>
+
+                <!--  NOUVEAU : Export PDF -->
+                <button class="action-btn btn-pdf" title="Exporter les billets PDF"
+                        (click)="exporterBilletsPDF(res.id!)"
+                        [disabled]="!res.billets || res.billets.length === 0">
+                  <i class="las la-file-pdf"></i>
+                </button>
+
                 <button class="action-btn btn-delete" title="Annuler"
                         (click)="onAnnuler(res.id!)"
                         [disabled]="res.statut !== 'EN_ATTENTE' && res.statut !== 'CONFIRMEE'">
@@ -279,7 +308,40 @@
         </div>
 
         <!-- Billets -->
+         <!-- Billets – version avec QR code -->
         <div class="form-section" *ngIf="form.billets.length > 0">
+          <div class="form-section-title">Billets générés</div>
+       
+          <div class="row g-3">
+            <div class="col-md-6" *ngFor="let billet of form.billets; let i = index">
+              <div class="card billet-card border-0 shadow-sm">
+                <div class="card-body text-center p-3">
+                  <!-- QR Code -->
+                  <img
+                    [src]="getQrUrl(billet.qrCode || '')"
+                    [alt]="'QR Code ' + billet.nomPassager"
+                    class="billet-qr-img mb-2"
+                    loading="lazy" />
+                  <!-- Infos essentielles -->
+                  <h6 class="fw-semibold mb-1">{{ billet.nomPassager }}</h6>
+                  <span class="badge bg-secondary bg-opacity-10 text-dark mb-2">
+                    Siège {{ billet.numeroSiege || '—' }}
+                  </span>
+                  <br />
+                  <span
+                    class="statut-badge"
+                    [class.statut-confirmee]="billet.statut === 'VALIDE'"
+                    [class.statut-en-attente]="billet.statut === 'EN_ATTENTE'">
+                    {{ billet.statut === 'VALIDE' ? 'Payé' : 'En attente' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- <div class="form-section" *ngIf="form.billets.length > 0">
           <div class="form-section-title">Billets générés</div>
           <div class="row g-2">
             <div class="col-md-6" *ngFor="let billet of form.billets; let i = index">
@@ -291,7 +353,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
 
       <!-- ══ FORMULAIRE ══ -->
@@ -331,7 +393,8 @@
                   <input type="number" min="1" class="form-control"
                          [(ngModel)]="form.nombrePlace"
                          [disabled]="isSubmitting"
-                         (ngModelChange)="onNombrePlaceChange()" />
+                         (ngModelChange)="onNombrePlaceChange()" 
+                         [max]="nombrePlacesDisponibles"/>
                 </div>
                 <span *ngIf="formErrors.nombrePlace" class="field-error-msg">
                   <i class="las la-exclamation-circle"></i> {{ formErrors.nombrePlace }}
@@ -342,7 +405,11 @@
             <!-- Plan de sièges -->
             <div class="col-12" *ngIf="form.trajetId && siegesDisponibles.length > 0">
               <div class="card border-0 bg-light p-3">
-                <h6 class="fw-bold mb-3"><i class="las la-chair me-2"></i>Choisissez vos sièges</h6>
+                <h6 class="fw-bold mb-3"><i class="las la-chair me-2"></i>Choisissez vos sièges (<span style="color: red;">{{ siegesSelectionnes.length }}</span> / {{ form.nombrePlace }}) ==> (Place disponible: {{ siegesDisponibles.length - siegesOccupes.length }})</h6>
+                <h6 class="fw-semibold mb-3 text-muted" style="font-size:13px">
+                  <i class="las la-info-circle me-1"></i>
+                  {{ siegesOccupes.length > 0 ? 'Les sièges en grises sont déjà occupés pour ce trajet.' : 'Tous les sièges sont disponibles pour ce trajet.' }}
+                </h6>
                 <div class="seat-grid">
                   <button *ngFor="let siege of siegesDisponibles"
                           class="seat-btn"
@@ -465,7 +532,7 @@
               </div>
             </div>
 
-            <div class="col-12">
+            <!-- <div class="col-12">
               <div class="form-field">
                 <label>Utilisateur lié <span class="optional">(optionnel)</span></label>
                 <div class="input-wrap">
@@ -478,7 +545,7 @@
                   </select>
                 </div>
               </div>
-            </div>
+            </div> -->
 
           </div>
         </div>
@@ -488,9 +555,16 @@
 
     <!-- Pied -->
     <div class="modal-actions">
+       <button *ngIf="modalMode === 'visualisation' && form.billets.length > 0"
+          class="btn-transia-ghost" style="color: #dc2626; border-color: #dc2626"
+          (click)="exporterBilletsPDF(editingId!)">
+        <i class="las la-file-pdf me-1"></i> Exporter les billets PDF
+      </button>
+
       <button class="btn-transia-ghost" (click)="closeModal()" [disabled]="isSubmitting">
         {{ modalMode === 'visualisation' ? 'Fermer' : 'Annuler' }}
       </button>
+      
       <button *ngIf="modalMode !== 'visualisation'"
               class="btn-transia-primary" (click)="submitForm()" [disabled]="isSubmitting">
         <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm"></span>
@@ -513,7 +587,7 @@
 
     <!-- Barre de titre -->
     <div class="modal-top-bar">
-      <div class="modal-top-icon" style="background: linear-gradient(135deg, #d1fae5, rgba(16,185,129,.2)); color: #065f46;">
+      <div class="modal-top-icon" style="background: linear-gradient(135deg, #d1fae5, rgba(110, 114, 158, 0.2)); color: #6559a6;">
         <i class="las la-cash-register"></i>
       </div>
       <div class="modal-top-title">
@@ -541,7 +615,7 @@
       </div>
 
       <!-- Récap réservation -->
-      <div class="card border-0 mb-3" style="background: #f0fdf4">
+      <div class="card border-0 mb-3" style="background: #f6f6f8">
         <div class="card-body py-3">
           <div class="row g-2 text-center">
             <div class="col-4">
@@ -556,7 +630,7 @@
             </div>
             <div class="col-4">
               <div class="small text-muted">Total à payer</div>
-              <div class="fw-bold fs-4 text-success">
+              <div class="fw-bold fs-4 text-primary">
                 {{ montantAttendu | number }} FCFA
               </div>
             </div>
@@ -581,7 +655,7 @@
               <i class="las la-exclamation-circle"></i> {{ paiementErrors.montantVerse }}
             </span>
           </div>
-          <button type="button" class="btn btn-outline-secondary btn-sm mt-2"
+          <button type="button" class="btn btn-outline-primary btn-sm mt-2"
                   (click)="remplirMontantExact()" [disabled]="isPaiementSubmitting">
             <i class="las la-equals"></i> Montant exact
           </button>
@@ -593,7 +667,7 @@
             <strong class="fs-5">{{ monnaieARendre | number }} FCFA</strong>
           </div>
           <div *ngIf="paiementForm.montantVerse && montantSuffisant && monnaieARendre === 0"
-               class="alert alert-success d-flex align-items-center gap-2 py-2 mt-2 mb-0">
+               class="alert alert-primary d-flex align-items-center gap-2 py-2 mt-2 mb-0">
             <i class="las la-check-circle"></i> Montant exact.
           </div>
         </div>
@@ -607,12 +681,12 @@
             <div class="col-6" *ngFor="let mode of modesPaiement">
               <div class="card border p-2 text-center"
                    style="cursor:pointer; transition: all .15s"
-                   [class.border-success]="paiementForm.modePaiement === mode.value"
-                   [style.background]="paiementForm.modePaiement === mode.value ? '#f0fdf4' : ''"
+                   [class.border-primary]="paiementForm.modePaiement === mode.value"
+                   [style.background]="paiementForm.modePaiement === mode.value ? '#d8e5fa' : ''"
                    (click)="!isPaiementSubmitting && (paiementForm.modePaiement = mode.value);
                             paiementErrors.modePaiement = undefined">
                 <i class="las {{ mode.icon }} fs-4 mb-1 d-block"
-                   [class.text-success]="paiementForm.modePaiement === mode.value"
+                   [class.text-primary]="paiementForm.modePaiement === mode.value"
                    [class.text-muted]="paiementForm.modePaiement !== mode.value"></i>
                 <span class="small fw-semibold">{{ mode.label }}</span>
               </div>
@@ -645,7 +719,7 @@
               [disabled]="isPaiementSubmitting">Annuler</button>
       <button class="btn-transia-primary" (click)="submitPaiement()"
               [disabled]="isPaiementSubmitting || !montantSuffisant"
-              style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 20px rgba(16,185,129,.25);">
+              style="background: linear-gradient(135deg, #387eef, #0641e3); box-shadow: 0 4px 20px rgba(16, 55, 185, 0.25);">
         <span *ngIf="isPaiementSubmitting" class="spinner-border spinner-border-sm"></span>
         <i *ngIf="!isPaiementSubmitting" class="las la-check-circle"></i>
         {{ isPaiementSubmitting ? 'Encaissement...' : 'Valider le paiement' }}

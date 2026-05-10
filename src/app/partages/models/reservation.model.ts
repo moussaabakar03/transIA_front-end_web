@@ -33,4 +33,5 @@ export interface Billet {
   nomPassager: string;
   statut: string;
   qrCode?: string;
+  numeroSiege?: string;
 }
