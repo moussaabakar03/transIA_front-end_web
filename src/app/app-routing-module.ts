@@ -4,6 +4,7 @@ import { AuthComponent } from './pages/auth/auth-component/auth-component';
 import { BaseComponents } from './mise-en-pages/base-components/base-components';
 import { DashboardComponent } from './pages/dashboard-component/dashboard-component';
 import { AuthGuard } from './coeur/garde-auth/auth.guard';
+import { ListeUtilisateurComponent } from './pages/utilisateur/liste-utilisateur-component/liste-utilisateur-component';
 
 const routes: Routes = [
   { path: 'login', component: AuthComponent },
@@ -57,6 +58,12 @@ const routes: Routes = [
           import('./pages/reservation/reservation.module').then(m => m.ReservationModule),
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard]
+      },
+      {
+        path: 'utilisateurs',
+        component: ListeUtilisateurComponent,
+        canActivate: [AuthGuard],
+        data: { roles: ['ROLE_ADMIN', 'AGENT_ACCUEIL'] }
       }
       
     ]

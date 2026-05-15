@@ -1,3 +1,8 @@
+export interface Role {
+    id: number;
+    name?: string;
+}
+
 export interface User {
     id?: number;
     fullName: string;
@@ -6,5 +11,16 @@ export interface User {
     nom: string;   
     password: string;
     enable: boolean;
-    roles: string; 
+    roles: Role;
 }
+
+
+export interface Profile {
+    id?: string;
+    userId?: number;
+    photoProfil?: string;
+    telephone?: string;
+    nomComplet?: string;
+    adresse?: string;
+}
+

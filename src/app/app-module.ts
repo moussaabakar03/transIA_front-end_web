@@ -15,6 +15,7 @@ import { HeaderComponent } from './mise-en-pages/base-components/header-componen
 import { FooterComponent } from './mise-en-pages/base-components/footer-component/footer-component';
 import { DashboardComponent } from './pages/dashboard-component/dashboard-component';
 import { HttpClientModule } from '@angular/common/http';
+import { ListeUtilisateurComponent } from './pages/utilisateur/liste-utilisateur-component/liste-utilisateur-component';
 // import { ListeTrajetCompent } from './pages/transport/trajet/liste-trajet-compent/liste-trajet-compent';
 // import { ListeVilleComponent } from './pages/transport/ville/liste-ville-component/liste-ville-component';
 // import { AjoutVilleComponent } from './pages/transport/ville/ajout-ville-component/ajout-ville-component';
@@ -30,6 +31,7 @@ import { HttpClientModule } from '@angular/common/http';
     HeaderComponent,
     FooterComponent,
     DashboardComponent,
+    ListeUtilisateurComponent,
     // ListeTrajetCompent,
     // ListeVilleComponent,
     // AjoutVilleComponent
@@ -42,6 +44,7 @@ import { HttpClientModule } from '@angular/common/http';
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),
+    // provideHttpClient(withInterceptorsFromDi()), //  pour les interceptors basés sur des fonctions
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
