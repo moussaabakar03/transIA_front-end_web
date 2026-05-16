@@ -25,4 +25,13 @@ export class UserService {
   getAllUsers(): Observable<User[]> {
     return this.http.get<User[]>(`${environment.backendurl}/users`);
   }
+
+  saveUser(user: any): Observable<User> {
+    return this.http.post<User>(`${environment.backendurl}/users`, user);
+  }
+
+  getAllRoles(): Observable<any[]> {
+    return this.http.get<any[]>("http://localhost:8181/api/roles/list");
+  }
+
 }

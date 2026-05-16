@@ -1,0 +1,286 @@
+<!-- ╔════════════════════════════════════════════════════╗ -->
+<!-- ║   TRANSIA — Gestion des utilisateurs (Redesign)    ║ -->
+<!-- ╚════════════════════════════════════════════════════╝ -->
+
+<div class="utilisateur-list-container">
+
+  <!-- ── En-tête ──────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="page-eyebrow">TransIa · Administration</div>
+      <h4>Gestion des utilisateurs</h4>
+      <p>Gérez les comptes, rôles et profils de vos collaborateurs</p>
+    </div>
+    <button class="btn-transia-primary" (click)="openModal('add')">
+      <i class="las la-plus"></i> Nouvel utilisateur
+    </button>
+  </div>
+
+  <!-- ── Filtres ────────────────────────────────────── -->
+  <div class="filter-card">
+    <div class="filter-row">
+      <div class="filter-group filter-group-lg">
+        <span class="filter-label">Recherche</span>
+        <div class="search-input-wrap">
+          <i class="las la-search search-icon"></i>
+          <input type="text" class="form-control"
+                 placeholder="Nom, username, rôle, téléphone…"
+                 [(ngModel)]="searchTerm"
+                 (input)="applyFilter()" />
+        </div>
+      </div>
+      <div class="filter-actions">
+        <span class="count-badge">
+          <i class="las la-filter me-1"></i>{{ filteredUsers.length }} résultat(s)
+        </span>
+        <button class="btn-transia-ghost" (click)="loadUsers()" title="Actualiser">
+          <i class="las la-sync-alt"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Chargement ─────────────────────────────────── -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner-ring"></div>
+    <p>Chargement des utilisateurs…</p>
+  </div>
+
+  <!-- ── Erreur ─────────────────────────────────────── -->
+  <div *ngIf="errorMessage && !isLoading" class="alert-transia alert-error mb-3">
+    <i class="las la-exclamation-triangle"></i>
+    <span>{{ errorMessage }}</span>
+    <button class="btn-transia-ghost ms-auto" (click)="loadUsers()">Réessayer</button>
+  </div>
+
+  <!-- ── Tableau ────────────────────────────────────── -->
+  <div *ngIf="!isLoading && !errorMessage" class="table-card">
+    <div class="table-card-header">
+      <h6><i class="las la-users me-2"></i>Liste des utilisateurs</h6>
+    </div>
+
+    <div class="table-responsive">
+      <table class="transia-table">
+        <thead>
+          <tr>
+            <th style="width:50px">#</th>
+            <th>Utilisateur</th>
+            <th>Rôle</th>
+            <th>Téléphone</th>
+            <th>Statut</th>
+            <th style="width:130px; text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty state -->
+          <tr *ngIf="filteredUsers.length === 0">
+            <td colspan="6">
+              <div class="empty-state">
+                <div class="empty-icon"><i class="las la-user-circle"></i></div>
+                <h5>Aucun utilisateur trouvé</h5>
+                <p>Créez un nouveau compte pour commencer.</p>
+                <div>
+                  <button class="btn-transia-primary" (click)="openModal('add')">
+                    <i class="las la-plus"></i> Nouvel utilisateur
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Lignes -->
+          <tr *ngFor="let user of filteredUsers; let i = index">
+            <td><span class="row-num">{{ i+1 }}</span></td>
+            <td>
+              <div class="user-identity">
+                <div class="user-avatar" [style.backgroundImage]="user.profil?.photoProfil ? 'url(' + user.profil?.photoProfil + ')' : 'none'">
+                  <span *ngIf="!user.profil?.photoProfil">{{ getInitials(user.fullName) }}</span>
+                </div>
+                <div>
+                  <div class="user-name">{{ user.profil?.nomComplet || user.fullName }}</div>
+                  <div class="user-username">{{ user.username }}</div>
+                </div>
+              </div>
+            </td>
+            <!-- <td><span class="role-chip">{{ getRoleLabel(user) }}</span></td> -->
+            <td><span class="role-chip">{{ user.roles.name }}</span></td>
+            <!-- <td><span class="role-chip">{{ user.roles }}</span></td> -->
+            <!-- <td>
+                <span class="role-chip" *ngFor="let r of user.roles">
+                    {{ r?.name || r }}  
+                </span>
+            </td> -->
+            <td>{{ user.profil?.telephone || '—' }}</td>
+            <td>
+              <span class="statut-badge" [class.statut-actif]="user.enable" [class.statut-inactif]="!user.enable">
+                {{ user.enable ? 'Actif' : 'Inactif' }}
+              </span>
+            </td>
+            <td style="text-align:right">
+              <div style="display:flex;justify-content:flex-end;gap:6px">
+                <button class="action-btn btn-view" title="Voir / Modifier" (click)="onEdit(user.id!)">
+                  <i class="las la-pen"></i>
+                </button>
+                <button class="action-btn btn-delete" title="Désactiver" (click)="onDisable(user.id!)" *ngIf="user.enable">
+                  <i class="las la-user-times"></i>
+                </button>
+                <button class="action-btn btn-success" title="Activer" (click)="onEnable(user.id!)" *ngIf="!user.enable">
+                  <i class="las la-user-check"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer" *ngIf="filteredUsers.length > 0">
+      <span class="footer-count">
+        Affichage de <strong>{{ filteredUsers.length }}</strong> utilisateur(s)
+        sur <strong>{{ users.length }}</strong>
+      </span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL — DÉTAILS / MODIFICATION UTILISATEUR + PROFIL
+     ═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" [class.show]="isModalOpen" (click)="closeModal()">
+  <div class="modal-sheet" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+
+    <!-- Barre de titre -->
+    <div class="modal-top-bar">
+      <div class="modal-top-icon">
+        <i class="las la-user-cog"></i>
+      </div>
+      <div class="modal-top-title">
+        <h5>{{ modalMode === 'add' ? 'Nouvel utilisateur' : 'Profil de l\'utilisateur' }}</h5>
+        <p>{{ modalMode === 'add' ? 'Créez un compte et son profil' : 'Consultez ou modifiez les informations' }}</p>
+      </div>
+      <button class="modal-top-close" (click)="closeModal()" [disabled]="isSubmitting">
+        <i class="las la-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-content-area">
+      <!-- Alertes -->
+      <div *ngIf="formError" class="alert-transia alert-error">
+        <i class="las la-exclamation-circle"></i> {{ formError }}
+      </div>
+      <div *ngIf="formSuccess" class="alert-transia alert-success">
+        <i class="las la-check-circle"></i> {{ formSuccess }}
+      </div>
+
+      <!-- Formulaire -->
+      <!-- <div *ngIf="selectedUser" class="row g-4"> -->
+    <div *ngIf="selectedUser || modalMode === 'add'" class="row g-4">
+        <!-- Colonne gauche : infos du compte -->
+        <div class="col-md-6">
+          <div class="form-section">
+            <div class="form-section-title">Compte</div>
+            <div class="form-field">
+              <label>Nom complet <span class="required">*</span></label>
+              <div class="input-wrap">
+                <i class="las la-user input-icon"></i>
+                <input type="text" class="form-control" [(ngModel)]="editUser.fullName" [disabled]="isSubmitting" />
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Nom d'utilisateur</label>
+              <div class="input-wrap">
+                <i class="las la-at input-icon"></i>
+                <input type="text" class="form-control" [(ngModel)]="editUser.username"/>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Rôle</label>
+              <div class="input-wrap">
+                <i class="las la-user-tag input-icon"></i>
+                <!-- <select class="form-select" [(ngModel)]="editUser.roles" [disabled]="isSubmitting">
+                  <option *ngFor="let r of roleOptions" [ngValue]="r">{{ r }}</option>
+                </select> -->
+                <!-- <select class="form-select" [(ngModel)]="editUser.roles" [disabled]="isSubmitting">
+                  @if (roles.length > 0) {
+                    <option *ngFor="let r of roles" [ngValue]="r.name">{{ r.name }}</option>
+                  } @else {
+                    <option>Aucun rôle disponible</option>
+                  }
+                </select> -->
+                <select class="form-select"
+                      [(ngModel)]="editUser.roleId"
+                      [disabled]="isSubmitting">
+                  <option *ngFor="let r of roles" [ngValue]="r.id">
+                    {{ r.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Statut</label>
+              <div class="input-wrap">
+                <i class="las la-toggle-on input-icon"></i>
+                <select class="form-select" [(ngModel)]="editUser.enable" [disabled]="isSubmitting">
+                  <option [ngValue]="true">Actif</option>
+                  <option [ngValue]="false">Inactif</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-field" *ngIf="modalMode === 'add'">
+              <label>Mot de passe <span class="required">*</span></label>
+              <div class="input-wrap">
+                <i class="las la-lock input-icon"></i>
+                <input type="password" class="form-control" [(ngModel)]="editUser.password" [disabled]="isSubmitting" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Colonne droite : profil -->
+        <div class="col-md-6">
+          <div class="form-section">
+            <div class="form-section-title">Profil</div>
+            <div class="form-field">
+              <label>Photo (URL)</label>
+              <div class="input-wrap">
+                <i class="las la-image input-icon"></i>
+                <input type="url" class="form-control" [(ngModel)]="editProfile.photoProfil" [disabled]="isSubmitting" />
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Téléphone</label>
+              <div class="input-wrap">
+                <i class="las la-phone input-icon"></i>
+                <input type="text" class="form-control" [(ngModel)]="editProfile.telephone" [disabled]="isSubmitting" />
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Nom complet (profil)</label>
+              <div class="input-wrap">
+                <i class="las la-id-card input-icon"></i>
+                <input type="text" class="form-control" [(ngModel)]="editProfile.nomComplet" [disabled]="isSubmitting" />
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Adresse</label>
+              <div class="input-wrap">
+                <i class="las la-map-pin input-icon"></i>
+                <input type="text" class="form-control" [(ngModel)]="editProfile.adresse" [disabled]="isSubmitting" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-transia-ghost" (click)="closeModal()" [disabled]="isSubmitting">Annuler</button>
+      <button class="btn-transia-primary" (click)="save()" [disabled]="isSubmitting">
+        <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm"></span>
+        {{ isSubmitting ? 'Enregistrement...' : 'Enregistrer' }}
+      </button>
+    </div>
+  </div>
+</div>
